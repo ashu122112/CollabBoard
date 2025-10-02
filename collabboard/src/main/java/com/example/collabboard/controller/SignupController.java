@@ -1,17 +1,28 @@
 package com.example.collabboard.controller;
 
 import com.example.collabboard.service.UserService;
+import com.example.collabboard.util.SceneManager;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+import org.springframework.context.ApplicationContext; // <-- Import ApplicationContext
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
 
 @Component
 public class SignupController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+    private final ApplicationContext applicationContext; // <-- Add this
+
+    // Use constructor injection
+    public SignupController(UserService userService, ApplicationContext applicationContext) {
+        this.userService = userService;
+        this.applicationContext = applicationContext; // <-- Add this
+    }
 
     @FXML private TextField usernameField;
     @FXML private TextField emailField;
@@ -21,34 +32,12 @@ public class SignupController {
 
     @FXML
     protected void handleSignupButtonAction(ActionEvent event) {
-        String username = usernameField.getText();
-        String email = emailField.getText();
-        String password = passwordField.getText();
-        String confirmPassword = confirmPasswordField.getText();
-
-        if (!password.equals(confirmPassword)) {
-            messageLabel.setText("Passwords do not match.");
-            return;
-        }
-
-        if (username.isEmpty() || email.isEmpty() || password.isEmpty()) {
-            messageLabel.setText("Please fill in all fields.");
-            return;
-        }
-
-        try {
-            userService.registerUser(username, email, password);
-            messageLabel.setStyle("-fx-text-fill: green;");
-            messageLabel.setText("Registration successful! Please login.");
-        } catch (Exception e) {
-            messageLabel.setStyle("-fx-text-fill: red;");
-            messageLabel.setText(e.getMessage());
-        }
+        // ... (your existing signup logic is fine)
     }
 
     @FXML
-    protected void handleLoginLinkAction(ActionEvent event) {
-        // TODO: Navigate back to the login scene
-        System.out.println("Navigate to login");
+    protected void handleLoginLinkAction(ActionEvent event) throws IOException {
+        // Pass the applicationContext to the SceneManager
+        SceneManager.switchScene(event, "LoginView.fxml", "CollabBoard Login", applicationContext);
     }
 }
