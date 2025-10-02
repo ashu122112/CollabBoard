@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="10" alignment="CENTER" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.collabboard.controller.SignupController"
+      style="-fx-padding: 20;">
+    <Label text="Create a CollabBoard Account" style="-fx-font-size: 24px;"/>
+    <TextField fx:id="usernameField" promptText="Username"/>
+    <TextField fx:id="emailField" promptText="Email"/>
+    <PasswordField fx:id="passwordField" promptText="Password"/>
+    <PasswordField fx:id="confirmPasswordField" promptText="Confirm Password"/>
+    <Button text="Sign Up" onAction="#handleSignupButtonAction"/>
+    <Hyperlink text="Already have an account? Login" onAction="#handleLoginLinkAction"/>
+    <Label fx:id="messageLabel" style="-fx-text-fill: red;"/>
+</VBox>

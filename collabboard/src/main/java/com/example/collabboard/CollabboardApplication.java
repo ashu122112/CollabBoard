@@ -1,15 +1,16 @@
+// In: collabboard/src/main/java/com/example/collabboard/CollabboardApplication.java
+
 package com.example.collabboard;
 
-import org.springframework.boot.SpringApplication;
+import javafx.application.Application; // <-- Make sure this is imported
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import javafx.application.Application;
 
 @SpringBootApplication
 public class CollabboardApplication {
 
-	public static void main(String[] args) {
-		// SpringApplication.run(CollabboardApplication.class, args);
-		Application.launch(JavaFxApplication.class, args);
-	}
+    public static void main(String[] args) {
+        // This is the only line that should be in your main method now.
+        // It tells JavaFX to take over the startup process.
+        Application.launch(JavaFxApplication.class, args);
+    }
 }
