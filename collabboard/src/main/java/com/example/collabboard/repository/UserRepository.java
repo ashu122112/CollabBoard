@@ -9,5 +9,6 @@
     public interface UserRepository extends JpaRepository<User, Long> {
         // Spring Data JPA automatically creates the query from the method name
         Optional<User> findByUsername(String username);
+         Optional<User> findByEmail(String email);
     }
     

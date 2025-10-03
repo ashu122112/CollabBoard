@@ -1,56 +1,68 @@
 package com.example.collabboard.controller;
 
+import com.example.collabboard.config.FxmlView;
+import com.example.collabboard.model.User;
+import com.example.collabboard.service.StageManager;
 import com.example.collabboard.service.UserService;
-import com.example.collabboard.util.SceneManager;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
+import java.util.Optional;
 
 @Component
 public class LoginController {
 
-    private final UserService userService;
-    private final ApplicationContext applicationContext;
+    // Inject the new StageManager for navigation
+    @Lazy
+    @Autowired
+    private StageManager stageManager;
 
-    public LoginController(UserService userService, ApplicationContext applicationContext) {
-        this.userService = userService;
-        this.applicationContext = applicationContext;
-    }
-
-    @FXML private TextField usernameField;
-    @FXML private PasswordField passwordField;
-    @FXML private Label errorLabel;
+    @Autowired
+    private UserService userService;
 
     @FXML
-    protected void handleLoginButtonAction(ActionEvent event) throws IOException {
+    private TextField usernameField;
+
+    @FXML
+    private PasswordField passwordField;
+
+    @FXML
+    private Label errorLabel; // Changed from messageLabel to match your FXML
+
+    @FXML
+    void handleLoginButtonAction(ActionEvent event) {
         String username = usernameField.getText();
         String password = passwordField.getText();
 
-        try {
-            userService.loginUser(username, password);
+        // The updated userService.loginUser returns an Optional
+        Optional<User> userOptional = userService.loginUser(username, password);
 
-            // *** THIS IS THE FIX ***
-            // Navigate to the new DashboardView instead of the old MainWindow
-            SceneManager.switchScene(
-                event,
-                "DashboardView.fxml",           // <-- The only change is here
-                "CollabBoard - Dashboard",      // You can update the title too
-                applicationContext
-            );
-
-        } catch (Exception e) {
-            errorLabel.setText("Invalid username or password");
+        if (userOptional.isPresent()) {
+            errorLabel.setText("Login Successful!");
+            // Switch to the dashboard and pass the logged-in user's data
+            DashboardController dashboardController = stageManager.switchScene(FxmlView.DASHBOARD);
+            dashboardController.setLoggedInUser(userOptional.get());
+        } else {
+            errorLabel.setText("Invalid username or password.");
         }
     }
 
     @FXML
-    protected void handleSignupLinkAction(ActionEvent event) throws IOException {
-        SceneManager.switchScene(event, "SignupView.fxml", "CollabBoard - Sign Up", applicationContext);
+    void handleSignupLinkAction(ActionEvent event) {
+        // Use the StageManager to switch to the signup view
+        stageManager.switchScene(FxmlView.SIGNUP);
+    }
+
+    // Add this new method to handle the "Forgot Password" link
+    @FXML
+    void handleForgotPasswordLinkAction(ActionEvent event) {
+        stageManager.switchScene(FxmlView.FORGOT_PASSWORD);
     }
 }
+

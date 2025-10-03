@@ -28,12 +28,20 @@ public class StageManager implements ApplicationListener<StageReadyEvent> {
     public void onApplicationEvent(StageReadyEvent event) {
         this.primaryStage = event.getStage();
         primaryStage.setTitle("CollabBoard");
-        switchScene(FxmlView.LOGIN);
+        switchScene(FxmlView.LOGIN); // This will call the void version
     }
 
-    public void switchScene(final FxmlView view) {
-        Parent viewRoot = loadViewNodeHierarchy(view.getFxmlFile());
-        show(viewRoot);
+    /**
+     * Switches the scene and returns the controller of the new scene.
+     * This is useful when you need to pass data to the new controller.
+     * @param view The FxmlView enum constant for the scene to switch to.
+     * @param <T> The type of the controller.
+     * @return The controller instance for the new scene.
+     */
+    public <T> T switchScene(final FxmlView view) {
+        FXMLLoader fxmlLoader = loadViewNodeHierarchy(view.getFxmlFile());
+        show(fxmlLoader.getRoot());
+        return fxmlLoader.getController();
     }
 
     private void show(final Parent rootnode) {
@@ -55,18 +63,25 @@ public class StageManager implements ApplicationListener<StageReadyEvent> {
         }
     }
 
-    private Parent loadViewNodeHierarchy(String fxmlFilePath) {
-        Parent rootNode = null;
+    /**
+     * Loads the FXML file and returns the FXMLLoader instance.
+     * This allows us to access both the root node and the controller.
+     * @param fxmlFilePath The path to the FXML file.
+     * @return The configured FXMLLoader instance.
+     */
+    private FXMLLoader loadViewNodeHierarchy(String fxmlFilePath) {
+        FXMLLoader fxmlLoader = null;
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxmlFilePath));
+            fxmlLoader = new FXMLLoader(getClass().getResource(fxmlFilePath));
             fxmlLoader.setControllerFactory(applicationContext::getBean);
-            rootNode = fxmlLoader.load();
-            Objects.requireNonNull(rootNode, "A Root FXML node must not be null");
+            fxmlLoader.load();
+            Objects.requireNonNull(fxmlLoader.getRoot(), "A Root FXML node must not be null");
         } catch (IOException e) {
             System.err.println("Unable to load FXML view: " + fxmlFilePath);
             e.printStackTrace();
             Platform.exit();
         }
-        return rootNode;
+        return fxmlLoader;
     }
 }
+
