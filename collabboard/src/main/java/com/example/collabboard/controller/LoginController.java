@@ -1,7 +1,7 @@
 package com.example.collabboard.controller;
 
 import com.example.collabboard.service.UserService;
-import com.example.collabboard.util.SceneManager; // <-- Make sure this is imported
+import com.example.collabboard.util.SceneManager;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -28,31 +28,29 @@ public class LoginController {
     @FXML private Label errorLabel;
 
     @FXML
-    protected void handleLoginButtonAction(ActionEvent event) throws IOException { // <-- Add throws IOException
+    protected void handleLoginButtonAction(ActionEvent event) throws IOException {
         String username = usernameField.getText();
         String password = passwordField.getText();
 
         try {
-            // This line checks the credentials
             userService.loginUser(username, password);
 
             // *** THIS IS THE FIX ***
-            // If login is successful, navigate to the main window
+            // Navigate to the new DashboardView instead of the old MainWindow
             SceneManager.switchScene(
                 event,
-                "MainWindow.fxml",      // The FXML file for your main app screen
-                "CollabBoard",          // The new window title
+                "DashboardView.fxml",           // <-- The only change is here
+                "CollabBoard - Dashboard",      // You can update the title too
                 applicationContext
             );
 
         } catch (Exception e) {
-            errorLabel.setText("Invalid username or password"); // Provide a clear error
+            errorLabel.setText("Invalid username or password");
         }
     }
 
     @FXML
     protected void handleSignupLinkAction(ActionEvent event) throws IOException {
-        // This should already be working correctly
         SceneManager.switchScene(event, "SignupView.fxml", "CollabBoard - Sign Up", applicationContext);
     }
 }

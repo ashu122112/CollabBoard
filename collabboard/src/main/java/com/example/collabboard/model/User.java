@@ -1,10 +1,13 @@
     package com.example.collabboard.model;
 
-    import jakarta.persistence.Entity;
+    import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
     import jakarta.persistence.GeneratedValue;
     import jakarta.persistence.GenerationType;
     import jakarta.persistence.Id;
-    import jakarta.persistence.Table;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import java.util.List;
 
     @Entity
     @Table(name = "users") // Specifies the table name in the database
@@ -18,8 +21,11 @@
         private String email;
         private String password;
 
+        @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+        private List<Room> rooms;
+
         // Getters and Setters for all fields
-        // You can generate these easily in VS Code (right-click -> Source Action)
+        
         public Long getId() { return id; }
         public void setId(Long id) { this.id = id; }
         public String getUsername() { return username; }
@@ -28,5 +34,8 @@
         public void setEmail(String email) { this.email = email; }
         public String getPassword() { return password; }
         public void setPassword(String password) { this.password = password; }
+
+
+        
     }
     
