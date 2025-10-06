@@ -16,14 +16,16 @@
         <ToolBar>
             <items>
                 <Label text="Tools:" />
-                <Button text="Pen" />
-                <Button text="Eraser" />
+                <!-- Added onAction handlers to the buttons -->
+                <Button onAction="#selectPenTool" text="Pen" />
+                <Button onAction="#selectEraserTool" text="Eraser" />
                 <ColorPicker fx:id="colorPicker" />
-                
-                <!-- This Pane pushes the room code to the right side of the toolbar -->
+
+                <!-- This Pane pushes the room code to the right -->
                 <Pane HBox.hgrow="ALWAYS" />
 
                 <Label fx:id="roomCodeLabel" style="-fx-font-weight: bold;" text="Room Code: ..." />
+                <Button onAction="#handleExitRoom" text="Exit Room" style="-fx-background-color: #ff6347; -fx-text-fill: white;"/>
             </items>
         </ToolBar>
     </top>
@@ -34,4 +36,3 @@
       <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
    </padding>
 </BorderPane>
-
