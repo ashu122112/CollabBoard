@@ -1,12 +1,10 @@
 package com.example.collabboard.service;
 
+import com.example.collabboard.network.Client;
+import com.example.collabboard.network.Host;
 import javafx.application.Platform;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 import org.springframework.stereotype.Service;
 
-import com.example.collabboard.network.Host;
-import com.example.collabboard.network.Client;
 import java.io.IOException;
 import java.util.function.Consumer;
 
@@ -22,39 +20,36 @@ public class CollaborationService {
     }
 
     public void startHost(int port) throws IOException {
-        // If already running, do nothing
         if (host != null) return;
-
-        // Create and start the host server on a new thread
         host = new Host(port, this::receiveDataFromServer);
         new Thread(host).start();
         System.out.println("Host started on port " + port);
     }
 
-    public void connectToHost(String ipAddress, int port) throws IOException {
-        // If already connected, do nothing
+    /**
+     * Updated method to accept success and failure callbacks.
+     * @param ipAddress The IP of the host to connect to.
+     * @param port The port of the host.
+     * @param onSuccess A Runnable to execute on successful connection.
+     * @param onFailure A Consumer to handle any connection exceptions.
+     */
+    public void connectToHost(String ipAddress, int port, Runnable onSuccess, Consumer<Exception> onFailure) {
         if (client != null) return;
-
-        // Create and connect the client on a new thread
-        client = new Client(ipAddress, port, this::receiveDataFromServer);
+        client = new Client(ipAddress, port, this::receiveDataFromServer, onSuccess, onFailure);
         new Thread(client).start();
-        System.out.println("Connected to host at " + ipAddress + ":" + port);
+        System.out.println("Attempting to connect to host at " + ipAddress + ":" + port);
     }
 
-    // Called by Host or Client when a message arrives
     private void receiveDataFromServer(String data) {
         if (onDataReceived != null) {
-            // Run on JavaFX thread to safely update the UI
             Platform.runLater(() -> onDataReceived.accept(data));
         }
     }
 
-    // This allows the WhiteboardController to "listen" for new data
     public void setOnDataReceived(Consumer<String> listener) {
         this.onDataReceived = listener;
     }
 
-    // Send a message out to the network
     public void send(String data) {
         if (host != null) {
             host.broadcast(data);
