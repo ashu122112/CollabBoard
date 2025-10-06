@@ -10,26 +10,39 @@ public class Client implements Runnable {
     private Socket socket;
     private PrintWriter writer;
     private final Consumer<String> onDataReceived;
+    private final Runnable onSuccess;
+    private final Consumer<Exception> onFailure;
 
-    public Client(String hostIp, int port, Consumer<String> onDataReceived) {
+    /**
+     * Updated constructor to accept callbacks.
+     */
+    public Client(String hostIp, int port, Consumer<String> onDataReceived, Runnable onSuccess, Consumer<Exception> onFailure) {
         this.hostIp = hostIp;
         this.port = port;
         this.onDataReceived = onDataReceived;
+        this.onSuccess = onSuccess;
+        this.onFailure = onFailure;
     }
 
     @Override
     public void run() {
         try {
+            // The connection attempt happens here
             socket = new Socket(hostIp, port);
             writer = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+            // If the connection was successful, trigger the success callback
+            onSuccess.run();
 
             String message;
             while ((message = reader.readLine()) != null) {
                 onDataReceived.accept(message);
             }
         } catch (IOException e) {
-            System.out.println("Disconnected from host.");
+            // If the connection failed, trigger the failure callback
+            System.err.println("Failed to connect to host: " + e.getMessage());
+            onFailure.accept(e);
         }
     }
 

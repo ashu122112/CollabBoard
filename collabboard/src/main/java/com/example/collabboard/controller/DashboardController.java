@@ -4,6 +4,7 @@ import com.example.collabboard.config.FxmlView;
 import com.example.collabboard.model.User;
 import com.example.collabboard.service.CollaborationService;
 import com.example.collabboard.service.StageManager;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -91,21 +92,24 @@ public class DashboardController {
             messageLabel.setText("Please enter the Host's IP Address.");
             return;
         }
-
-        try {
-            // Connect this user as a CLIENT to the host's IP
-            collaborationService.connectToHost(ipAddress.trim(), 12345);
-
-            // Navigate to the whiteboard
-            WhiteboardController wc = stageManager.switchScene(FxmlView.WHITEBOARD);
-            wc.initData(ipAddress.trim());
-
-        } catch (Exception e) {
-            // This catch block handles the IOException from connectToHost
-            messageLabel.setStyle("-fx-text-fill: red;");
-            messageLabel.setText("Failed to connect to host: " + ipAddress);
-            e.printStackTrace();
-        }
+        
+        messageLabel.setText("Connecting to " + ipAddress + "...");
+        
+        // --- THIS IS THE FIX ---
+        // We now provide callbacks for success and failure.
+        // The navigation to the whiteboard only happens on success.
+        collaborationService.connectToHost(ipAddress.trim(), 12345,
+            // On Success action:
+            () -> Platform.runLater(() -> {
+                WhiteboardController wc = stageManager.switchScene(FxmlView.WHITEBOARD);
+                wc.initData(ipAddress.trim());
+            }),
+            // On Failure action:
+            (exception) -> Platform.runLater(() -> {
+                messageLabel.setStyle("-fx-text-fill: red;");
+                messageLabel.setText("Failed to connect to host: " + exception.getMessage());
+            })
+        );
     }
 
     /**
