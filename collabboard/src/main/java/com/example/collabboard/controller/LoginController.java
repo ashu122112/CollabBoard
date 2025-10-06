@@ -107,4 +107,39 @@ public class LoginController {
             fade.play();
         }
     }
+<<<<<<< HEAD
 }
+=======
+
+    @FXML
+    void handleLoginButtonAction(ActionEvent event) {
+        String username = usernameField.getText();
+        String password = passwordField.getText();
+
+        // The updated userService.loginUser returns an Optional
+        Optional<User> userOptional = userService.loginUser(username, password);
+
+        if (userOptional.isPresent()) {
+            errorLabel.setText("Login Successful!");
+            // Switch to the main application and pass the logged-in user's data
+            MainController mainController = stageManager.switchScene(FxmlView.MAIN);
+            mainController.setLoggedInUser(userOptional.get());
+        } else {
+            errorLabel.setText("Invalid username or password.");
+        }
+    }
+
+    @FXML
+    void handleSignupLinkAction(ActionEvent event) {
+        // Use the StageManager to switch to the signup view
+        stageManager.switchScene(FxmlView.SIGNUP);
+    }
+
+    // Add this new method to handle the "Forgot Password" link
+    @FXML
+    void handleForgotPasswordLinkAction(ActionEvent event) {
+        stageManager.switchScene(FxmlView.FORGOT_PASSWORD);
+    }
+}
+
+>>>>>>> fd5b9a1b80998d3273c5392d4323a9969290664e

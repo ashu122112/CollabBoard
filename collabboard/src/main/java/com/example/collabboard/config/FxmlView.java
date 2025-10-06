@@ -41,6 +41,13 @@ public enum FxmlView {
 
         @Override
         public String getFxmlFile() { return "/fxml/ResetPasswordView.fxml"; }
+    },
+    MAIN {
+        @Override
+        public String getTitle() { return "CollabBoard - Main Application"; }
+
+        @Override
+        public String getFxmlFile() { return "/fxml/MainView.fxml"; }
     };
 
     public abstract String getTitle();
