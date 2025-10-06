@@ -16,7 +16,7 @@ public class WhiteboardController {
 
     @FXML private Canvas canvas;
     @FXML private ColorPicker colorPicker;
-    @FXML private Label roomCodeLabel; // <-- This field is needed for the UI
+    @FXML private Label roomCodeLabel;
 
     private GraphicsContext graphicsContext;
     private final CollaborationService collaborationService;
@@ -27,26 +27,16 @@ public class WhiteboardController {
         this.collaborationService = collaborationService;
     }
 
-    /**
-     * This method is called by the DashboardController to pass in the room code.
-     * This is the method that was missing and causing the error.
-     * @param roomCode The unique code for the collaboration room.
-     */
     public void initData(String roomCode) {
-        // We run this on the JavaFX thread to ensure UI updates are safe
-        Platform.runLater(() -> {
-            roomCodeLabel.setText("Room Code: " + roomCode);
-            // Here you would connect to the host or start the host
-            // collaborationService.connect(roomCode);
-        });
+        Platform.runLater(() -> roomCodeLabel.setText("Room Code: " + roomCode));
     }
 
     @FXML
     public void initialize() {
         graphicsContext = canvas.getGraphicsContext2D();
+        graphicsContext.setLineWidth(2.0); // Set line width once
         colorPicker.setValue(Color.BLACK);
 
-        // Set up listener for incoming data from other users
         collaborationService.setOnDataReceived(this::parseAndDrawData);
 
         // --- Mouse Event Handlers for Drawing ---
@@ -60,10 +50,14 @@ public class WhiteboardController {
             double y = event.getY();
             Color color = colorPicker.getValue();
 
-            // Format the drawing action into a simple string protocol
-            String data = String.format("DRAW:%.2f,%.2f,%.2f,%.2f,%s", lastX, lastY, x, y, color.toString());
+            // --- THIS IS THE FIX ---
+            // Draw the line on the local canvas immediately.
+            drawLine(lastX, lastY, x, y, color);
 
-            // Send the data over the network via the service
+            // Create a data string for this drawing action
+            String data = String.format("DRAW:%.2f,%.2f,%.2f,%.2f,%s", lastX, lastY, x, y, color.toString());
+            
+            // Send the data over the network to other users
             collaborationService.send(data);
 
             // Update the last known coordinates for the next drag event
@@ -73,8 +67,7 @@ public class WhiteboardController {
     }
 
     /**
-     * This method is called when a data string is received from the CollaborationService.
-     * It runs on the JavaFX Application Thread to safely update the UI.
+     * This method is called when a data string is received from another user.
      */
     private void parseAndDrawData(String data) {
         Platform.runLater(() -> {
@@ -89,19 +82,26 @@ public class WhiteboardController {
                 double endY = Double.parseDouble(params[3]);
                 Color color = Color.valueOf(params[4]);
 
-                // Draw the line received from another user on the local canvas
-                graphicsContext.setStroke(color);
-                graphicsContext.setLineWidth(2.0);
-                graphicsContext.beginPath();
-                graphicsContext.moveTo(startX, startY);
-                graphicsContext.lineTo(endX, endY);
-                graphicsContext.stroke();
+                // Draw the line received from the other user.
+                drawLine(startX, startY, endX, endY, color);
 
             } catch (Exception e) {
                 System.err.println("Could not parse incoming data: " + data);
                 e.printStackTrace();
             }
         });
+    }
+    
+    /**
+     * A helper method to draw a line on the canvas.
+     * This avoids code duplication between local and remote drawing.
+     */
+    private void drawLine(double startX, double startY, double endX, double endY, Color color) {
+        graphicsContext.setStroke(color);
+        graphicsContext.beginPath();
+        graphicsContext.moveTo(startX, startY);
+        graphicsContext.lineTo(endX, endY);
+        graphicsContext.stroke();
     }
 }
 

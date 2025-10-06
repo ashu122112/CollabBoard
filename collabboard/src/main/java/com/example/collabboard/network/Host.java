@@ -1,6 +1,9 @@
 package com.example.collabboard.network;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -38,10 +41,14 @@ public class Host implements Runnable {
         }
     }
 
+    /**
+     * Sends a message originating from the host to all connected clients.
+     * @param message The data to be sent.
+     */
     public void broadcast(String message) {
-        // First, process the message on the host's own UI
-        onDataReceived.accept(message);
-        // Then, send it to all connected clients
+        // The host's UI has already been updated by its own mouse events.
+        // We do NOT need to call onDataReceived.accept(message) here.
+        // This method's only job is to send the message to the clients.
         synchronized (clientWriters) {
             for (PrintWriter writer : clientWriters) {
                 writer.println(message);
@@ -49,10 +56,15 @@ public class Host implements Runnable {
         }
     }
 
+    /**
+     * Forwards a message that came from one client to the host's UI and to all other clients.
+     * @param message The data received from a client.
+     * @param sender  The PrintWriter of the client who sent the message.
+     */
     public void forwardMessage(String message, PrintWriter sender) {
-        // Send the message to the host's UI
+        // First, process the message on the host's own UI. This is correct.
         onDataReceived.accept(message);
-        // Forward the message to all other clients (except the original sender)
+        // Then, forward the message to all other clients (except the original sender).
         synchronized (clientWriters) {
             for (PrintWriter writer : clientWriters) {
                 if (writer != sender) {
@@ -71,6 +83,8 @@ public class Host implements Runnable {
             if (serverSocket != null && !serverSocket.isClosed()) {
                 serverSocket.close();
             }
+            // Clear the list of writers to stop broadcasting
+            clientWriters.clear();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -105,3 +119,4 @@ public class Host implements Runnable {
         }
     }
 }
+
