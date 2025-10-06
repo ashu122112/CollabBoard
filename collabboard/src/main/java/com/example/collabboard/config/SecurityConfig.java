@@ -10,7 +10,6 @@
 
         @Bean
         public PasswordEncoder passwordEncoder() {
-            // Use BCrypt for strong, modern password hashing
             return new BCryptPasswordEncoder();
         }
     }

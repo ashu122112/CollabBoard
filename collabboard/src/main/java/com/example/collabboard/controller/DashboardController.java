@@ -1,18 +1,18 @@
 package com.example.collabboard.controller;
 
-import com.example.collabboard.config.FxmlView;
 import com.example.collabboard.model.User;
 import com.example.collabboard.service.CollaborationService;
-import com.example.collabboard.service.StageManager;
+import com.example.collabboard.service.SessionManager;
+import com.example.collabboard.util.SceneManager;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -20,70 +20,50 @@ import java.net.UnknownHostException;
 public class DashboardController {
 
     // --- Dependencies ---
-    @Lazy
-    @Autowired
-    private StageManager stageManager;
-
-    @Autowired
-    private CollaborationService collaborationService;
-
-    // --- State ---
-    private User loggedInUser;
+    private final SessionManager sessionManager;
+    private final CollaborationService collaborationService;
+    private final ApplicationContext applicationContext;
 
     // --- FXML Fields ---
-    @FXML
-    private Label welcomeLabel;
-    @FXML
-    private TextField ipAddressField;
-    @FXML
-    private Label messageLabel;
+    @FXML private Label welcomeLabel;
+    @FXML private TextField ipAddressField;
+    @FXML private Label messageLabel;
 
-    /**
-     * Called from the LoginController to pass the current user's data.
-     */
-    public void setLoggedInUser(User user) {
-        this.loggedInUser = user;
-        if (loggedInUser != null) {
-            welcomeLabel.setText("Welcome, " + loggedInUser.getUsername() + "!");
+    // Use constructor injection for all dependencies
+    public DashboardController(SessionManager sessionManager, CollaborationService collaborationService, ApplicationContext applicationContext) {
+        this.sessionManager = sessionManager;
+        this.collaborationService = collaborationService;
+        this.applicationContext = applicationContext;
+    }
+
+    @FXML
+    public void initialize() {
+        // Pull the logged-in user from the central session manager
+        User currentUser = sessionManager.getCurrentUser();
+        if (currentUser != null) {
+            welcomeLabel.setText("Welcome, " + currentUser.getUsername() + "!");
         } else {
             welcomeLabel.setText("Welcome!");
         }
     }
 
-    /**
-     * Handles the "Create New Room" button click. Starts a host server.
-     */
     @FXML
     void handleCreateRoom(ActionEvent event) {
         try {
-            // Start this user as the HOST on a default port
-            collaborationService.startHost(12345);
+            collaborationService.startHost(12345); // Start the server
+            String localIp = InetAddress.getLocalHost().getHostAddress();
 
-            String roomCode = "UNKNOWN";
-            // Display the host's local IP address so others can join
-            try {
-                roomCode = InetAddress.getLocalHost().getHostAddress();
-                messageLabel.setStyle("-fx-text-fill: green;");
-                messageLabel.setText("Room created! Share this IP with others: " + roomCode);
-            } catch (UnknownHostException e) {
-                messageLabel.setText("Room created! Could not determine your IP.");
-            }
+            // Store the IP in the central service for the next screen to access
+            collaborationService.setCurrentRoomIdentifier(localIp);
 
-            // Navigate to the whiteboard and pass the room code
-            WhiteboardController wc = stageManager.switchScene(FxmlView.WHITEBOARD);
-            wc.initData(roomCode);
-
-        } catch (Exception e) {
-            // This catch block handles the IOException from startHost
+            // Navigate to the whiteboard
+            SceneManager.switchScene(event, "WhiteboardView.fxml", "CollabBoard", applicationContext);
+        } catch (IOException e) {
             messageLabel.setStyle("-fx-text-fill: red;");
-            messageLabel.setText("Failed to create room: " + e.getMessage());
-            e.printStackTrace();
+            messageLabel.setText("Failed to start host: " + e.getMessage());
         }
     }
 
-    /**
-     * Handles the "Join Room" button click. Connects as a client to a host.
-     */
     @FXML
     void handleJoinRoom(ActionEvent event) {
         String ipAddress = ipAddressField.getText();
@@ -94,32 +74,34 @@ public class DashboardController {
         }
         
         messageLabel.setText("Connecting to " + ipAddress + "...");
-        
-        // --- THIS IS THE FIX ---
-        // We now provide callbacks for success and failure.
-        // The navigation to the whiteboard only happens on success.
+
+        // Use the improved connectToHost method with callbacks
         collaborationService.connectToHost(ipAddress.trim(), 12345,
-            // On Success action:
-            () -> Platform.runLater(() -> {
-                WhiteboardController wc = stageManager.switchScene(FxmlView.WHITEBOARD);
-                wc.initData(ipAddress.trim());
-            }),
-            // On Failure action:
+            // On Success:
+            () -> {
+                // Store the IP in the central service
+                collaborationService.setCurrentRoomIdentifier(ipAddress.trim());
+                // Navigate to the whiteboard on the JavaFX thread
+                Platform.runLater(() -> {
+                    try {
+                        SceneManager.switchScene(event, "WhiteboardView.fxml", "CollabBoard", applicationContext);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+            },
+            // On Failure:
             (exception) -> Platform.runLater(() -> {
                 messageLabel.setStyle("-fx-text-fill: red;");
-                messageLabel.setText("Failed to connect to host: " + exception.getMessage());
+                messageLabel.setText("Failed to connect: " + exception.getMessage());
             })
         );
     }
 
-    /**
-     * Handles the "Logout" button click.
-     */
     @FXML
-    void handleLogoutButtonAction(ActionEvent event) {
-        loggedInUser = null;
-        collaborationService.stop(); // Stop any active network connection
-        stageManager.switchScene(FxmlView.LOGIN);
+    void handleLogoutButtonAction(ActionEvent event) throws IOException {
+        sessionManager.clearSession();
+        collaborationService.stop();
+        SceneManager.switchScene(event, "LoginView.fxml", "CollabBoard Login", applicationContext);
     }
 }
-

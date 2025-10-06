@@ -14,6 +14,7 @@ public class CollaborationService {
     private Host host;
     private Client client;
     private Consumer<String> onDataReceived;
+    private String currentRoomIdentifier; // --- ADDED --- To store the current room's IP/code
 
     public boolean isHost() {
         return host != null;
@@ -39,29 +40,31 @@ public class CollaborationService {
 
     private void receiveDataFromServer(String data) {
         if (onDataReceived != null) {
-            // All UI updates must happen on the JavaFX Application Thread.
-            // Platform.runLater ensures this.
             Platform.runLater(() -> onDataReceived.accept(data));
         }
     }
 
-    // This is called by the WhiteboardController to register itself as a listener.
     public void setOnDataReceived(Consumer<String> listener) {
         this.onDataReceived = listener;
     }
 
-    // This is called by the WhiteboardController to send drawing data out.
     public void send(String data) {
         if (host != null) {
-            // If we are the host, broadcast to all clients.
             host.broadcast(data);
         } else if (client != null) {
-            // If we are a client, send to the host.
             client.sendMessage(data);
         }
     }
 
-    // Shuts down any active network connections.
+    // --- ADDED --- Getter and Setter for the room identifier
+    public void setCurrentRoomIdentifier(String identifier) {
+        this.currentRoomIdentifier = identifier;
+    }
+
+    public String getCurrentRoomIdentifier() {
+        return this.currentRoomIdentifier;
+    }
+
     public void stop() {
         if (host != null) {
             host.shutdown();
@@ -71,7 +74,7 @@ public class CollaborationService {
             client.shutdown();
             client = null;
         }
+        this.currentRoomIdentifier = null; // --- ADDED --- Clear the identifier on stop
         System.out.println("Collaboration service stopped.");
     }
 }
-
