@@ -96,9 +96,9 @@ public class LoginController {
 
         if (userOptional.isPresent()) {
             errorLabel.setText("Login Successful!");
-            // Switch to the dashboard and pass the logged-in user's data
-            DashboardController dashboardController = stageManager.switchScene(FxmlView.DASHBOARD);
-            dashboardController.setLoggedInUser(userOptional.get());
+            // Switch to the main application and pass the logged-in user's data
+            MainController mainController = stageManager.switchScene(FxmlView.MAIN);
+            mainController.setLoggedInUser(userOptional.get());
         } else {
             errorLabel.setText("Invalid username or password.");
         }

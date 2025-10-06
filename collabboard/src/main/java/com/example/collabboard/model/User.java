@@ -17,9 +17,12 @@ import java.util.List;
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id;
 
-        private String username;
-        private String email;
-        private String password;
+    private String username;
+    private String email;
+    private String password;
+    private String name;
+    private boolean online;
+    private String avatarUrl;
 
         @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
         private List<Room> rooms;
@@ -35,7 +38,13 @@ import java.util.List;
         public String getPassword() { return password; }
         public void setPassword(String password) { this.password = password; }
 
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
 
-        
+        public boolean isOnline() { return online; }
+        public void setOnline(boolean online) { this.online = online; }
+
+        public String getAvatarUrl() { return avatarUrl; }
+        public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
     }
     
