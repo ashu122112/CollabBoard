@@ -1,135 +1,84 @@
 package com.example.collabboard.controller;
 
-import com.example.collabboard.model.User;
+import com.example.collabboard.service.SessionManager;
+import com.example.collabboard.util.SceneManager;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
 
 @Component
 public class MainController {
 
-    @FXML
-    private BorderPane mainContainer;
+    // --- Dependencies ---
+    private final ApplicationContext applicationContext;
+    private final SessionManager sessionManager;
 
-    @FXML
-    private Button homeBtn;
+    // --- FXML Fields ---
+    @FXML private BorderPane mainContainer;
+    @FXML private Button homeBtn;
+    @FXML private Button whiteboardBtn;
+    // Add other buttons from your FXML as needed
 
-    @FXML
-    private Button collabBtn;
-
-    @FXML
-    private Button whiteboardBtn;
-
-    @FXML
-    private Button chatBtn;
-
-    @FXML
-    private Button analyticsBtn;
-
-    @FXML
-    private Button projectsBtn;
-
-    @FXML
-    private Button settingsBtn;
-
-    @FXML
-    private Button helpBtn;
-
-    @Lazy
-    @Autowired
-    private ApplicationContext applicationContext;
-
-    private User loggedInUser;
-    private DashboardController dashboardController;
+    // Use constructor injection for all required dependencies
+    public MainController(ApplicationContext applicationContext, SessionManager sessionManager) {
+        this.applicationContext = applicationContext;
+        this.sessionManager = sessionManager;
+    }
 
     @FXML
     public void initialize() {
-        // Add icons to buttons programmatically
-        homeBtn.setText("🏠 " + homeBtn.getText());
-        collabBtn.setText("👥 " + collabBtn.getText());
-        whiteboardBtn.setText("📊 " + whiteboardBtn.getText());
-        chatBtn.setText("💬 " + chatBtn.getText());
-        analyticsBtn.setText("📈 " + analyticsBtn.getText());
-        projectsBtn.setText("📁 " + projectsBtn.getText());
-        settingsBtn.setText("⚙️ " + settingsBtn.getText());
-        helpBtn.setText("❓ " + helpBtn.getText());
-
-        loadDashboard();
-        setupNavigationHandlers();
+        // Load the initial view (dashboard) when the main controller starts
+        loadView("/fxml/DashboardView.fxml");
     }
 
-    public void setLoggedInUser(User user) {
-        this.loggedInUser = user;
-        if (dashboardController != null) {
-            dashboardController.setLoggedInUser(user);
-        }
+    /**
+     * Handles the Home button click, loading the dashboard.
+     */
+    @FXML
+    private void handleHomeButtonAction(ActionEvent event) {
+        loadView("/fxml/DashboardView.fxml");
     }
 
-    private void loadDashboard() {
+    /**
+     * Handles the Whiteboard button click.
+     */
+    @FXML
+    private void handleWhiteboardButtonAction(ActionEvent event) {
+        loadView("/fxml/WhiteboardView.fxml");
+    }
+    
+    /**
+     * Handles the Logout button click.
+     */
+    @FXML
+    void handleLogoutButtonAction(ActionEvent event) throws IOException {
+        // Clear the user's session
+        sessionManager.clearSession();
+        // Navigate the entire window back to the login screen
+        SceneManager.switchScene(event, "LoginView.fxml", "CollabBoard Login", applicationContext);
+    }
+
+    /**
+     * A reusable helper method to load different FXML views into the center of the main BorderPane.
+     * @param fxmlPath The path to the .fxml file in the resources folder.
+     */
+    private void loadView(String fxmlPath) {
         try {
-            System.out.println("Loading dashboard...");
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/DashboardView.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            // Use Spring to create the controller, ensuring dependencies are injected
             loader.setControllerFactory(applicationContext::getBean);
-            BorderPane dashboard = loader.load();
-            dashboardController = loader.getController();
-            
-            // Set the logged-in user on the dashboard controller
-            if (loggedInUser != null && dashboardController != null) {
-                dashboardController.setLoggedInUser(loggedInUser);
-            }
-            
-            mainContainer.setCenter(dashboard);
-            System.out.println("Dashboard loaded successfully!");
-        } catch (Exception e) {
-            System.err.println("Error loading dashboard: " + e.getMessage());
+            Parent view = loader.load();
+            mainContainer.setCenter(view);
+        } catch (IOException e) {
+            System.err.println("Error loading FXML view: " + fxmlPath);
             e.printStackTrace();
         }
-    }
-
-    private void setupNavigationHandlers() {
-        homeBtn.setOnAction(e -> {
-            System.out.println("Home clicked");
-            loadDashboard();
-        });
-
-        collabBtn.setOnAction(e -> {
-            System.out.println("Collaboration Rooms clicked");
-            // TODO: Load collaboration rooms view
-        });
-
-        whiteboardBtn.setOnAction(e -> {
-            System.out.println("Whiteboard clicked");
-            // TODO: Load whiteboard view
-        });
-
-        chatBtn.setOnAction(e -> {
-            System.out.println("Chat clicked");
-            // TODO: Load chat view
-        });
-
-        analyticsBtn.setOnAction(e -> {
-            System.out.println("Analytics clicked");
-            // TODO: Load analytics view
-        });
-
-        projectsBtn.setOnAction(e -> {
-            System.out.println("Projects clicked");
-            // TODO: Load projects view
-        });
-
-        settingsBtn.setOnAction(e -> {
-            System.out.println("Settings clicked");
-            // TODO: Load settings view
-        });
-
-        helpBtn.setOnAction(e -> {
-            System.out.println("Help & Support clicked");
-            // TODO: Load help view
-        });
     }
 }
