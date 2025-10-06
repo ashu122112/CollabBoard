@@ -1,6 +1,7 @@
 package com.example.collabboard.config;
 
 public enum FxmlView {
+
     LOGIN {
         @Override
         public String getTitle() {
@@ -14,40 +15,59 @@ public enum FxmlView {
     },
     SIGNUP {
         @Override
-        public String getTitle() { return "CollabBoard - Sign Up"; }
+        public String getTitle() {
+            return "CollabBoard - Sign Up";
+        }
 
         @Override
-        public String getFxmlFile() { return "/fxml/SignupView.fxml"; }
+        public String getFxmlFile() {
+            return "/fxml/SignupView.fxml";
+        }
     },
     DASHBOARD {
         @Override
-        public String getTitle() { return "CollabBoard - Dashboard"; }
+        public String getTitle() {
+            return "CollabBoard - Dashboard";
+        }
 
         @Override
-        public String getFxmlFile() { return "/fxml/DashboardView.fxml"; }
+        public String getFxmlFile() {
+            return "/fxml/DashboardView.fxml";
+        }
     },
-    // ADD THIS ENUM CONSTANT
     FORGOT_PASSWORD {
         @Override
-        public String getTitle() { return "CollabBoard - Forgot Password"; }
+        public String getTitle() {
+            return "CollabBoard - Forgot Password";
+        }
 
         @Override
-        public String getFxmlFile() { return "/fxml/ForgotPasswordView.fxml"; }
+        public String getFxmlFile() {
+            return "/fxml/ForgotPasswordView.fxml";
+        }
     },
-    // ADD THIS ENUM CONSTANT
     RESET_PASSWORD {
         @Override
-        public String getTitle() { return "CollabBoard - Reset Password"; }
+        public String getTitle() {
+            return "CollabBoard - Reset Password";
+        }
 
         @Override
-        public String getFxmlFile() { return "/fxml/ResetPasswordView.fxml"; }
+        public String getFxmlFile() {
+            return "/fxml/ResetPasswordView.fxml";
+        }
     },
-    MAIN {
+    // This is the new entry for your whiteboard screen
+    WHITEBOARD {
         @Override
-        public String getTitle() { return "CollabBoard - Main Application"; }
+        public String getTitle() {
+            return "CollabBoard - Whiteboard";
+        }
 
         @Override
-        public String getFxmlFile() { return "/fxml/MainView.fxml"; }
+        public String getFxmlFile() {
+            return "/fxml/WhiteboardView.fxml";
+        }
     };
 
     public abstract String getTitle();
