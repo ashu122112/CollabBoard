@@ -2,6 +2,7 @@ package com.example.collabboard.controller;
 
 import com.example.collabboard.config.FxmlView;
 import com.example.collabboard.model.User;
+import com.example.collabboard.service.SessionManager;
 import com.example.collabboard.service.StageManager;
 import com.example.collabboard.service.UserService;
 import javafx.animation.FadeTransition;
@@ -9,55 +10,76 @@ import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.layout.Pane;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
+import javafx.util.Duration;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 import java.util.Random;
-import javafx.util.Duration;
 
 @Component
 public class LoginController {
 
-    // Inject the new StageManager for navigation
-    @Lazy
-    @Autowired
-    private StageManager stageManager;
+    // --- Dependencies ---
+    private final StageManager stageManager;
+    private final UserService userService;
+    private final SessionManager sessionManager;
 
-    @Autowired
-    private UserService userService;
+    // --- FXML Fields ---
+    @FXML private TextField usernameField;
+    @FXML private PasswordField passwordField;
+    @FXML private Label errorLabel;
+    @FXML private Pane animationPane;
 
-    @FXML
-    private TextField usernameField;
-
-    @FXML
-    private PasswordField passwordField;
-
-    @FXML
-    private Label errorLabel; // Changed from messageLabel to match your FXML
-
-    @FXML
-    private Pane animationPane;
+    // Use constructor injection for all dependencies
+    public LoginController(StageManager stageManager, UserService userService, SessionManager sessionManager) {
+        this.stageManager = stageManager;
+        this.userService = userService;
+        this.sessionManager = sessionManager;
+    }
 
     @FXML
     public void initialize() {
         startBackgroundAnimation();
     }
 
-    private void startBackgroundAnimation() {
-        if (animationPane == null) {
-            return;
+    @FXML
+    void handleLoginButtonAction(ActionEvent event) {
+        String username = usernameField.getText();
+        String password = passwordField.getText();
+
+        Optional<User> userOptional = userService.loginUser(username, password);
+
+        if (userOptional.isPresent()) {
+            // 1. Store the logged-in user in the central SessionManager
+            sessionManager.setCurrentUser(userOptional.get());
+
+            // 2. Switch to the dashboard view
+            stageManager.switchScene(FxmlView.DASHBOARD);
+        } else {
+            errorLabel.setText("Invalid username or password.");
         }
+    }
+
+    @FXML
+    void handleSignupLinkAction(ActionEvent event) {
+        stageManager.switchScene(FxmlView.SIGNUP);
+    }
+
+    @FXML
+    void handleForgotPasswordLinkAction(ActionEvent event) {
+        stageManager.switchScene(FxmlView.FORGOT_PASSWORD);
+    }
+
+    private void startBackgroundAnimation() {
+        if (animationPane == null) return;
         Random random = new Random();
         for (int i = 0; i < 12; i++) {
-            Circle circle = new Circle();
-            circle.setRadius(random.nextInt(40) + 20);
+            Circle circle = new Circle(random.nextInt(40) + 20);
             circle.setFill(javafx.scene.paint.Color.rgb(33, 150, 243, 0.12 + random.nextDouble() * 0.15));
             circle.setCenterX(random.nextDouble() * 800);
             circle.setCenterY(random.nextDouble() * 600);
@@ -85,35 +107,4 @@ public class LoginController {
             fade.play();
         }
     }
-
-    @FXML
-    void handleLoginButtonAction(ActionEvent event) {
-        String username = usernameField.getText();
-        String password = passwordField.getText();
-
-        // The updated userService.loginUser returns an Optional
-        Optional<User> userOptional = userService.loginUser(username, password);
-
-        if (userOptional.isPresent()) {
-            errorLabel.setText("Login Successful!");
-            // Switch to the dashboard and pass the logged-in user's data
-            DashboardController dashboardController = stageManager.switchScene(FxmlView.DASHBOARD);
-            dashboardController.setLoggedInUser(userOptional.get());
-        } else {
-            errorLabel.setText("Invalid username or password.");
-        }
-    }
-
-    @FXML
-    void handleSignupLinkAction(ActionEvent event) {
-        // Use the StageManager to switch to the signup view
-        stageManager.switchScene(FxmlView.SIGNUP);
-    }
-
-    // Add this new method to handle the "Forgot Password" link
-    @FXML
-    void handleForgotPasswordLinkAction(ActionEvent event) {
-        stageManager.switchScene(FxmlView.FORGOT_PASSWORD);
-    }
 }
-

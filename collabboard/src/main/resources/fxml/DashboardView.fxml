@@ -18,20 +18,19 @@
             <Font name="System Bold" size="24.0" />
          </font>
       </Label>
-      <Label fx:id="welcomeLabel" style="-fx-font-size: 16px;" text="You are logged in." />
+      <Label fx:id="welcomeLabel" style="-fx-font-size: 16px;" text="Welcome!" />
       
-      <Button fx:id="createRoomButton" onAction="#handleCreateRoom" prefHeight="40.0" prefWidth="200.0" text="Create New Room" />
+      <Button fx:id="createRoomButton" onAction="#handleCreateRoom" prefHeight="40.0" prefWidth="200.0" text="Create New Room (Host)" />
       
       <HBox alignment="CENTER" spacing="10.0">
          <children>
-            <TextField fx:id="roomCodeField" prefHeight="40.0" promptText="Enter Room Code" />
+            <TextField fx:id="ipAddressField" prefHeight="40.0" promptText="Enter Host IP Address" />
             <Button fx:id="joinRoomButton" onAction="#handleJoinRoom" prefHeight="40.0" text="Join Room" />
          </children>
       </HBox>
       
-      <Label fx:id="messageLabel" style="-fx-text-fill: red;" />
+      <Label fx:id="messageLabel" style="-fx-text-fill: green;" wrapText="true" />
 
       <Button onAction="#handleLogoutButtonAction" text="Logout" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-margin-top: 20;" />
    </children>
 </VBox>
-
