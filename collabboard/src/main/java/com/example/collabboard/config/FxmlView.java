@@ -57,7 +57,7 @@ public enum FxmlView {
             return "/fxml/ResetPasswordView.fxml";
         }
     },
-    // This is the new entry for your whiteboard screen
+
     WHITEBOARD {
         @Override
         public String getTitle() {

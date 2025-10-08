@@ -10,7 +10,7 @@ import jakarta.persistence.Table;
 import java.util.List;
 
     @Entity
-    @Table(name = "users") // Specifies the table name in the database
+    @Table(name = "users") 
     public class User {
 
         @Id
@@ -27,7 +27,7 @@ import java.util.List;
         @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
         private List<Room> rooms;
 
-        // Getters and Setters for all fields
+        
         
         public Long getId() { return id; }
         public void setId(Long id) { this.id = id; }

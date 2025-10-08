@@ -87,7 +87,7 @@ public class SignupController {
     }
 
     @FXML
-    protected void handleSignupButtonAction(ActionEvent event) throws IOException { // <-- Add throws IOException
+    protected void handleSignupButtonAction(ActionEvent event) throws IOException { 
         String username = usernameField.getText();
         String email = emailField.getText();
         String password = passwordField.getText();
@@ -109,11 +109,10 @@ public class SignupController {
         }
 
         try {
-            // This line registers the user
+            
             userService.registerUser(username, email, password);
 
-            // *** THIS IS THE FIX ***
-            // If registration is successful, automatically navigate to the login screen
+            
             SceneManager.switchScene(
                 event,
                 "LoginView.fxml",
@@ -129,7 +128,7 @@ public class SignupController {
 
     @FXML
     protected void handleLoginLinkAction(ActionEvent event) throws IOException {
-        // This should already be working correctly
+       
         SceneManager.switchScene(event, "LoginView.fxml", "CollabBoard Login", applicationContext);
     }
 }

@@ -15,7 +15,7 @@ public class DashboardStats {
         this.hoursCollaborated = hoursCollaborated;
     }
 
-    // Getters and setters
+    
     public int getActiveSessions() { return activeSessions; }
     public void setActiveSessions(int activeSessions) { this.activeSessions = activeSessions; }
 

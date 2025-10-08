@@ -27,7 +27,6 @@ public class JavaFxApplication extends Application {
         Platform.exit();
     }
 
-    // This event is published when the JavaFX application is ready
     public static class StageReadyEvent extends ApplicationEvent {
         public StageReadyEvent(Stage stage) {
             super(stage);

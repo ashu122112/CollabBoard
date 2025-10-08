@@ -27,19 +27,19 @@ public class WhiteboardController {
         PEN, ERASER
     }
 
-    // --- FXML Fields ---
+
     @FXML private Canvas canvas;
     @FXML private ColorPicker colorPicker;
     @FXML private Label roomCodeLabel;
     @FXML private ListView<String> chatListView;
     @FXML private TextField chatTextField;
 
-    // --- Dependencies ---
+  
     private final CollaborationService collaborationService;
     private final SessionManager sessionManager;
     private final ApplicationContext applicationContext;
 
-    // --- State ---
+ 
     private GraphicsContext graphicsContext;
     private Tool currentTool = Tool.PEN;
     private double lastX, lastY;
@@ -52,14 +52,13 @@ public class WhiteboardController {
 
     @FXML
 public void initialize() {
-    // --- THIS IS THE FIX: Bind the canvas size to its parent container ---
-    // Get the parent pane of the canvas (which is the AnchorPane)
+   
     AnchorPane parentPane = (AnchorPane) canvas.getParent();
-    // Bind the canvas's width and height properties to the parent pane's dimensions
+    
     canvas.widthProperty().bind(parentPane.widthProperty());
     canvas.heightProperty().bind(parentPane.heightProperty());
 
-    // --- The rest of your existing logic stays the same ---
+    
     graphicsContext = canvas.getGraphicsContext2D();
     colorPicker.setValue(Color.BLACK);
 
@@ -71,15 +70,15 @@ public void initialize() {
 
     collaborationService.setOnDataReceived(this::parseData);
 
-    // --- CORRECTED MOUSE EVENT HANDLERS ---
+   
 
     canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
         if (currentTool == Tool.PEN) {
             graphicsContext.setStroke(colorPicker.getValue());
             graphicsContext.setLineWidth(2.0);
-            graphicsContext.beginPath(); // Start a new path
+            graphicsContext.beginPath(); 
             graphicsContext.moveTo(event.getX(), event.getY());
-            graphicsContext.stroke(); // Draw a dot for a single click
+            graphicsContext.stroke(); 
         }
         lastX = event.getX();
         lastY = event.getY();
@@ -91,21 +90,21 @@ public void initialize() {
         String data = null;
 
         if (currentTool == Tool.PEN) {
-            // Draw the line locally for instant feedback
+            
             graphicsContext.lineTo(x, y);
             graphicsContext.stroke();
-            // Create the data string to send to others
+           
             data = String.format("DRAW:%.2f,%.2f,%.2f,%.2f,%s", lastX, lastY, x, y, colorPicker.getValue().toString());
         } else if (currentTool == Tool.ERASER) {
             double eraserSize = 15.0;
-            // Erase locally for instant feedback
+            
             eraseData(String.format("%.2f,%.2f,%.2f", x, y, eraserSize));
-            // Create the data string to send to others
+            
             data = String.format("ERASE:%.2f,%.2f,%.2f", x, y, eraserSize);
         }
 
         if (data != null) {
-            // Send the action to the network for others
+         
             collaborationService.send(data);
         }
 
@@ -114,7 +113,7 @@ public void initialize() {
     });
 }
 
-    // --- FXML Action Handlers (no changes) ---
+   
 
     @FXML
     private void selectPenTool() {
@@ -140,14 +139,14 @@ public void initialize() {
         String username = sessionManager.getCurrentUser().getUsername();
         String data = String.format("CHAT:%s: %s", username, message);
         
-        // Display locally immediately, then send
-        parseData(data);
+        
+       parseData(data);
         collaborationService.send(data);
         
         chatTextField.clear();
     }
 
-    // --- Data Processing (no changes) ---
+
 
     private void parseData(String data) {
         Platform.runLater(() -> {
@@ -183,7 +182,7 @@ public void initialize() {
             double endY = Double.parseDouble(params[3]);
             Color color = Color.valueOf(params[4]);
             
-            // This method is now only for drawing segments received from others
+           
             graphicsContext.setStroke(color);
             graphicsContext.setLineWidth(2.0);
             graphicsContext.beginPath();

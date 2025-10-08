@@ -28,15 +28,13 @@ public class StageManager implements ApplicationListener<StageReadyEvent> {
     public void onApplicationEvent(StageReadyEvent event) {
         this.primaryStage = event.getStage();
         primaryStage.setTitle("CollabBoard");
-        switchScene(FxmlView.LOGIN); // This will call the void version
+        switchScene(FxmlView.LOGIN); 
     }
 
     /**
-     * Switches the scene and returns the controller of the new scene.
-     * This is useful when you need to pass data to the new controller.
-     * @param view The FxmlView enum constant for the scene to switch to.
-     * @param <T> The type of the controller.
-     * @return The controller instance for the new scene.
+     * @param view 
+     * @param <T> 
+     * @return 
      */
     public <T> T switchScene(final FxmlView view) {
         FXMLLoader fxmlLoader = loadViewNodeHierarchy(view.getFxmlFile());
@@ -64,10 +62,8 @@ public class StageManager implements ApplicationListener<StageReadyEvent> {
     }
 
     /**
-     * Loads the FXML file and returns the FXMLLoader instance.
-     * This allows us to access both the root node and the controller.
-     * @param fxmlFilePath The path to the FXML file.
-     * @return The configured FXMLLoader instance.
+     * @param fxmlFilePath
+     * @return
      */
     private FXMLLoader loadViewNodeHierarchy(String fxmlFilePath) {
         FXMLLoader fxmlLoader = null;

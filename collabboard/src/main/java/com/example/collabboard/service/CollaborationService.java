@@ -14,7 +14,7 @@ public class CollaborationService {
     private Host host;
     private Client client;
     private Consumer<String> onDataReceived;
-    private String currentRoomIdentifier; // --- ADDED --- To store the current room's IP/code
+    private String currentRoomIdentifier; 
 
     public boolean isHost() {
         return host != null;
@@ -22,7 +22,7 @@ public class CollaborationService {
 
     public void startHost(int port) throws IOException {
         if (host != null || client != null) {
-            stop(); // Stop any existing connection first
+            stop(); 
         }
         host = new Host(port, this::receiveDataFromServer);
         new Thread(host).start();
@@ -31,7 +31,7 @@ public class CollaborationService {
 
     public void connectToHost(String ipAddress, int port, Runnable onSuccess, Consumer<Exception> onFailure) {
         if (client != null || host != null) {
-            stop(); // Stop any existing connection first
+            stop(); 
         }
         client = new Client(ipAddress, port, this::receiveDataFromServer, onSuccess, onFailure);
         new Thread(client).start();
@@ -56,7 +56,7 @@ public class CollaborationService {
         }
     }
 
-    // --- ADDED --- Getter and Setter for the room identifier
+    
     public void setCurrentRoomIdentifier(String identifier) {
         this.currentRoomIdentifier = identifier;
     }
@@ -74,7 +74,7 @@ public class CollaborationService {
             client.shutdown();
             client = null;
         }
-        this.currentRoomIdentifier = null; // --- ADDED --- Clear the identifier on stop
+        this.currentRoomIdentifier = null; 
         System.out.println("Collaboration service stopped.");
     }
 }

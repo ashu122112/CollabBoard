@@ -13,9 +13,7 @@ public class Client implements Runnable {
     private final Runnable onSuccess;
     private final Consumer<Exception> onFailure;
 
-    /**
-     * Updated constructor to accept callbacks.
-     */
+    
     public Client(String hostIp, int port, Consumer<String> onDataReceived, Runnable onSuccess, Consumer<Exception> onFailure) {
         this.hostIp = hostIp;
         this.port = port;
@@ -27,12 +25,12 @@ public class Client implements Runnable {
     @Override
     public void run() {
         try {
-            // The connection attempt happens here
+           
             socket = new Socket(hostIp, port);
             writer = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            // If the connection was successful, trigger the success callback
+            
             onSuccess.run();
 
             String message;
@@ -40,7 +38,7 @@ public class Client implements Runnable {
                 onDataReceived.accept(message);
             }
         } catch (IOException e) {
-            // If the connection failed, trigger the failure callback
+            
             System.err.println("Failed to connect to host: " + e.getMessage());
             onFailure.accept(e);
         }

@@ -25,18 +25,17 @@ import java.util.Random;
 @Component
 public class LoginController {
 
-    // --- Dependencies ---
     private final UserService userService;
     private final SessionManager sessionManager;
     private final ApplicationContext applicationContext;
 
-    // --- FXML Fields ---
+   
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
     @FXML private Label errorLabel;
     @FXML private Pane animationPane;
 
-    // Use constructor injection for all dependencies
+
     public LoginController(UserService userService, SessionManager sessionManager, ApplicationContext applicationContext) {
         this.userService = userService;
         this.sessionManager = sessionManager;
@@ -56,10 +55,10 @@ public class LoginController {
         Optional<User> userOptional = userService.loginUser(username, password);
 
         if (userOptional.isPresent()) {
-            // 1. Store the logged-in user in the central SessionManager
+           
             sessionManager.setCurrentUser(userOptional.get());
 
-            // 2. Switch to the dashboard view using our SceneManager
+           
             SceneManager.switchScene(event, "DashboardView.fxml", "CollabBoard - Dashboard", applicationContext);
         } else {
             errorLabel.setText("Invalid username or password.");
@@ -74,8 +73,7 @@ public class LoginController {
     @FXML
     void handleForgotPasswordLinkAction(ActionEvent event) throws IOException {
         System.out.println("Forgot Password link clicked!");
-        // TODO: Implement navigation to the forgot password screen
-        // SceneManager.switchScene(event, "ForgotPassword.fxml", "Reset Password", applicationContext);
+        
     }
 
     private void startBackgroundAnimation() {

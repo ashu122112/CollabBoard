@@ -19,12 +19,11 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
-    // In-memory storage for OTPs. In a real-world production app, this should
-    // be stored in a more persistent cache like Redis or a database table.
+    
     private final Map<String, String> otpStorage = new ConcurrentHashMap<>();
     private final Map<String, LocalDateTime> otpExpiryStorage = new ConcurrentHashMap<>();
 
-    // Using constructor injection is a best practice in Spring
+    
     @Autowired
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.userRepository = userRepository;
@@ -46,7 +45,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    // Returning an Optional is a cleaner way to handle a successful/failed login
+
     public Optional<User> loginUser(String username, String password) {
         Optional<User> userOptional = userRepository.findByUsername(username);
         if (userOptional.isPresent()) {
@@ -59,10 +58,8 @@ public class UserService {
     }
 
     /**
-     * Generates a 6-digit OTP, stores it, and sends it to the user's email.
-     *
-     * @param email The email address of the user who forgot their password.
-     * @throws Exception if no user is found with the given email.
+     * @param email 
+     * @throws Exception 
      */
     public void generateAndSendOtp(String email) throws Exception {
         userRepository.findByEmail(email)
@@ -73,18 +70,18 @@ public class UserService {
                 .getAsInt() + "";
 
         otpStorage.put(email, otp);
-        otpExpiryStorage.put(email, LocalDateTime.now().plusMinutes(10)); // OTP is valid for 10 minutes
+        otpExpiryStorage.put(email, LocalDateTime.now().plusMinutes(10)); 
 
         emailService.sendOtpEmail(email, otp);
     }
 
     /**
-     * Resets the user's password after verifying the OTP.
-     *
-     * @param email       The user's email.
-     * @param otp         The OTP code entered by the user.
-     * @param newPassword The new password to set.
-     * @throws Exception if the OTP is invalid/expired or the user is not found.
+
+     
+     * @param email       
+     * @param otp         
+     * @param newPassword 
+     * @throws Exception 
      */
     public void resetPassword(String email, String otp, String newPassword) throws Exception {
         if (!verifyOtp(email, otp)) {
@@ -97,22 +94,19 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
-        // Invalidate the OTP after it has been successfully used
         otpStorage.remove(email);
         otpExpiryStorage.remove(email);
     }
 
-    /**
-     * A private helper method to check if an OTP is valid and not expired.
-     */
+    
     private boolean verifyOtp(String email, String otp) {
-        // Check if the provided OTP matches the stored OTP
+        
         boolean isOtpValid = otp != null && otp.equals(otpStorage.get(email));
         if (!isOtpValid) {
             return false;
         }
 
-        // Check if the OTP has expired
+       
         LocalDateTime expiryTime = otpExpiryStorage.get(email);
         return expiryTime != null && expiryTime.isAfter(LocalDateTime.now());
     }

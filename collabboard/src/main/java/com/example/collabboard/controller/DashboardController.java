@@ -14,22 +14,22 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
+
 
 @Component
 public class DashboardController {
 
-    // --- Dependencies ---
+   
     private final SessionManager sessionManager;
     private final CollaborationService collaborationService;
     private final ApplicationContext applicationContext;
 
-    // --- FXML Fields ---
+    
     @FXML private Label welcomeLabel;
     @FXML private TextField ipAddressField;
     @FXML private Label messageLabel;
 
-    // Use constructor injection for all dependencies
+    
     public DashboardController(SessionManager sessionManager, CollaborationService collaborationService, ApplicationContext applicationContext) {
         this.sessionManager = sessionManager;
         this.collaborationService = collaborationService;
@@ -38,7 +38,7 @@ public class DashboardController {
 
     @FXML
     public void initialize() {
-        // Pull the logged-in user from the central session manager
+        
         User currentUser = sessionManager.getCurrentUser();
         if (currentUser != null) {
             welcomeLabel.setText("Welcome, " + currentUser.getUsername() + "!");
@@ -50,13 +50,12 @@ public class DashboardController {
     @FXML
     void handleCreateRoom(ActionEvent event) {
         try {
-            collaborationService.startHost(12345); // Start the server
+            collaborationService.startHost(12345); 
             String localIp = InetAddress.getLocalHost().getHostAddress();
 
-            // Store the IP in the central service for the next screen to access
             collaborationService.setCurrentRoomIdentifier(localIp);
 
-            // Navigate to the whiteboard
+           
             SceneManager.switchScene(event, "WhiteboardView.fxml", "CollabBoard", applicationContext);
         } catch (IOException e) {
             messageLabel.setStyle("-fx-text-fill: red;");
@@ -75,13 +74,13 @@ public class DashboardController {
         
         messageLabel.setText("Connecting to " + ipAddress + "...");
 
-        // Use the improved connectToHost method with callbacks
+        
         collaborationService.connectToHost(ipAddress.trim(), 12345,
             // On Success:
             () -> {
-                // Store the IP in the central service
+                
                 collaborationService.setCurrentRoomIdentifier(ipAddress.trim());
-                // Navigate to the whiteboard on the JavaFX thread
+                
                 Platform.runLater(() -> {
                     try {
                         SceneManager.switchScene(event, "WhiteboardView.fxml", "CollabBoard", applicationContext);

@@ -31,7 +31,6 @@ public class SessionDataCellFactory extends ListCell<SessionData> {
         cell.setPadding(new Insets(10, 15, 10, 15));
         cell.setStyle("-fx-background-color: white; -fx-background-radius: 8; -fx-border-radius: 8;");
         
-        // Color indicator circle
         Circle colorIndicator = new Circle(8);
         try {
             colorIndicator.setFill(Color.web(session.getColorCode()));
@@ -39,7 +38,6 @@ public class SessionDataCellFactory extends ListCell<SessionData> {
             colorIndicator.setFill(Color.LIGHTGRAY);
         }
         
-        // Session info
         VBox sessionInfo = new VBox(5);
         sessionInfo.setAlignment(Pos.CENTER_LEFT);
         

@@ -15,9 +15,9 @@ public class RoomService {
     }
 
     /**
-     * Creates a new collaboration room for a given user.
-     * @param owner The user who is creating the room.
-     * @return The newly created Room object with a unique code.
+     
+     * @param owner 
+     * @return
      */
     public Room createRoom(User owner) {
         Room newRoom = new Room();
@@ -26,9 +26,8 @@ public class RoomService {
     }
 
     /**
-     * Finds a room by its unique code.
-     * @param roomCode The code of the room to find.
-     * @return The Room object if found, otherwise null.
+     * @param roomCode 
+     * @return
      */
     public Room findRoomByCode(String roomCode) {
         return roomRepository.findByRoomCode(roomCode).orElse(null);

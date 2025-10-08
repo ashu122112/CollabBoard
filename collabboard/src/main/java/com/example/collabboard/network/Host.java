@@ -27,13 +27,12 @@ public class Host implements Runnable {
         try {
             serverSocket = new ServerSocket(port);
             while (!serverSocket.isClosed()) {
-                Socket clientSocket = serverSocket.accept(); // Blocks until a client connects
+                Socket clientSocket = serverSocket.accept(); 
                 System.out.println("Client connected: " + clientSocket.getInetAddress());
 
                 PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true);
                 clientWriters.add(writer);
 
-                // Create a new thread to handle messages from this client
                 new Thread(new ClientHandler(clientSocket, this)).start();
             }
         } catch (IOException e) {
@@ -42,8 +41,7 @@ public class Host implements Runnable {
     }
 
     /**
-     * Sends a message originating from the host to all connected clients.
-     * @param message The data to be sent.
+     * @param message 
      */
     public void broadcast(String message) {
         // The host's UI has already been updated by its own mouse events.
@@ -57,9 +55,8 @@ public class Host implements Runnable {
     }
 
     /**
-     * Forwards a message that came from one client to the host's UI and to all other clients.
-     * @param message The data received from a client.
-     * @param sender  The PrintWriter of the client who sent the message.
+     * @param message 
+     * @param sender  
      */
     public void forwardMessage(String message, PrintWriter sender) {
         // First, process the message on the host's own UI. This is correct.
@@ -83,14 +80,13 @@ public class Host implements Runnable {
             if (serverSocket != null && !serverSocket.isClosed()) {
                 serverSocket.close();
             }
-            // Clear the list of writers to stop broadcasting
+           
             clientWriters.clear();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    // Inner class to handle incoming messages from a single client
     private static class ClientHandler implements Runnable {
         private final Socket clientSocket;
         private final Host host;
