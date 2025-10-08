@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ColorPicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToolBar?>
@@ -15,30 +15,43 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.collabboard.controller.WhiteboardController">
+<BorderPane prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.collabboard.controller.WhiteboardController">
     <top>
         <ToolBar>
             <items>
                 <Label text="Tools:" />
                 <Button onAction="#selectPenTool" text="Pen" />
                 <Button onAction="#selectEraserTool" text="Eraser" />
+                
+                <Button onAction="#selectRectangleTool" text="Rectangle" />
+                <Button onAction="#selectOvalTool" text="Oval" />
+                <Button onAction="#selectStickyNoteTool" text="Sticky Note" />
+                
                 <ColorPicker fx:id="colorPicker" />
+                <Button onAction="#handleClearCanvas" text="Clear Canvas" />
+                <Separator orientation="VERTICAL" />
+                
+                <Label text="File:" />
+                <Button onAction="#handleUndo" text="Undo" /> <Button onAction="#handleRedo" text="Redo" /> 
+                <Button onAction="#handleSaveBoard" text="Save" />
+                <Button onAction="#handleLoadBoard" text="Load" />
+                <Button onAction="#handleExportAsImage" text="Export" />
                 <Pane HBox.hgrow="ALWAYS" />
+                
                 <Label fx:id="roomCodeLabel" style="-fx-font-weight: bold;" text="Room Info: ..." />
                 <Button onAction="#handleExitRoom" text="Exit Room" style="-fx-background-color: #f44336; -fx-text-fill: white;"/>
             </items>
         </ToolBar>
     </top>
     <center>
-        <SplitPane dividerPositions="0.75" BorderPane.alignment="CENTER">
+        <SplitPane dividerPositions="0.80" BorderPane.alignment="CENTER">
             <items>
-                <AnchorPane>
-                    <children>
+                <AnchorPane fx:id="canvasPane"> <children>
                         <Canvas fx:id="canvas" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                     </children>
                 </AnchorPane>
                 
-                <VBox spacing="5.0" style="-fx-padding: 5;" maxWidth="350" minWidth="200">
+                <VBox spacing="5.0" style="-fx-padding: 5;" maxWidth="400" minWidth="250">
                     <children>
                         <Label text="Session Chat" style="-fx-font-weight: bold;" />
                         <ListView fx:id="chatListView" VBox.vgrow="ALWAYS" />
