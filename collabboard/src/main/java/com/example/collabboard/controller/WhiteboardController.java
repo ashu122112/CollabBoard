@@ -10,16 +10,24 @@ import javafx.fxml.FXML;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.transform.Scale;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import org.springframework.context.ApplicationContext;
@@ -37,7 +45,7 @@ import java.util.Stack;
 @Component
 public class WhiteboardController {
 
-    private enum Tool { PEN, ERASER, RECTANGLE, OVAL, STICKY_NOTE }
+    private enum Tool { SELECTION, HAND, PEN, TEXT, ERASER, RECTANGLE, OVAL, STICKY_NOTE }
 
     // Use Stacks for efficient push/pop operations for undo/redo
     private final Stack<String> drawingHistory = new Stack<>();
@@ -47,13 +55,77 @@ public class WhiteboardController {
     private Tool currentTool = Tool.PEN;
     private double startX, startY;
     private double lastX, lastY;
+    private double currentZoom = 1.0;
+    private Scale scaleTransform;
 
+    // Canvas and core elements
     @FXML private AnchorPane canvasPane;
     @FXML private Canvas canvas;
     @FXML private ColorPicker colorPicker;
     @FXML private Label roomCodeLabel;
     @FXML private ListView<String> chatListView;
     @FXML private TextField chatTextField;
+    @FXML private Button sendChatButton;
+
+    // Tool group and individual tools
+    @FXML private ToggleGroup toolGroup;
+    @FXML private ToggleButton selectTool;
+    @FXML private ToggleButton handTool;
+    @FXML private ToggleButton penTool;
+    @FXML private ToggleButton textTool;
+    @FXML private ToggleButton noteTool;
+    @FXML private ToggleButton shapeTool;
+    @FXML private ToggleButton eraserTool;
+
+    // Action buttons
+    @FXML private Button clearBtn;
+    @FXML private Button undoBtn;
+    @FXML private Button redoBtn;
+    @FXML private Button saveBtn;
+    @FXML private Button loadBtn;
+    @FXML private Button exportBtn;
+
+    // Header elements
+    @FXML private HBox collaboratorsBox;
+    @FXML private Label collaboratorCountLabel;
+    @FXML private Button addCollaboratorBtn;
+    @FXML private Button shareButton;
+    @FXML private Button settingsButton;
+
+    // Zoom controls
+    @FXML private Label zoomLabel;
+    @FXML private Slider zoomSlider;
+
+    // Floating buttons
+    @FXML private Button fabBtn;
+    @FXML private Button imageUploadBtn;
+    @FXML private Button layersBtn;
+
+    // Left sidebar - Templates
+    @FXML private VBox templatesContainer;
+    @FXML private Button closeTemplatesBtn;
+    @FXML private Button brainstormingTemplate;
+    @FXML private Button mindMapTemplate;
+    @FXML private Button kanbanTemplate;
+    @FXML private Button flowchartTemplate;
+    @FXML private Button userJourneyTemplate;
+    @FXML private Button timelineTemplate;
+
+    // Left sidebar - Activity
+    @FXML private VBox activityList;
+    @FXML private Button closeActivityBtn;
+
+    // Right sidebar - Participants
+    @FXML private VBox participantsList;
+    @FXML private Button closeParticipantsBtn;
+    @FXML private Button inviteOthersBtn;
+
+    // Right sidebar - Version History
+    @FXML private VBox versionHistoryList;
+    @FXML private Button closeVersionBtn;
+
+    // Bottom
+    @FXML private Button exitRoomBtn;
 
     private final CollaborationService collaborationService;
     private final SessionManager sessionManager;
@@ -75,26 +147,132 @@ public class WhiteboardController {
         graphicsContext = canvas.getGraphicsContext2D();
         colorPicker.setValue(Color.BLACK);
 
+        // Initialize zoom functionality
+        setupZoomControls();
+
+        // Setup tool group selection  
+        setupToolGroup();
+
+        // Initialize room info for all
         String roomIdentifier = collaborationService.getCurrentRoomIdentifier();
         if (roomIdentifier != null) {
-            String labelPrefix = collaborationService.isHost() ? "Your IP: " : "Host IP: ";
+            String labelPrefix = collaborationService.isHost() ? "Room: " : "Room: ";
             roomCodeLabel.setText(labelPrefix + roomIdentifier);
         }
+
+        // Initialize collaboration and UI
         collaborationService.setOnDataReceived(this::parseData);
-        canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, this::handleMousePressed);
-        canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, this::handleMouseDragged);
-        canvas.addEventHandler(MouseEvent.MOUSE_RELEASED, this::handleMouseReleased);
+        setupCanvasEventHandlers();
+        initializeUIComponents();
     }
 
     // --- FXML ACTION HANDLERS ---
 
+    // Tool Selection Methods
+    @FXML private void selectSelectionTool() { currentTool = Tool.SELECTION; }
+    @FXML private void selectHandTool() { currentTool = Tool.HAND; }
     @FXML private void selectPenTool() { currentTool = Tool.PEN; }
+    @FXML private void selectTextTool() { currentTool = Tool.TEXT; }
     @FXML private void selectEraserTool() { currentTool = Tool.ERASER; }
     @FXML private void selectRectangleTool() { currentTool = Tool.RECTANGLE; }
     @FXML private void selectOvalTool() { currentTool = Tool.OVAL; }
     @FXML private void selectStickyNoteTool() { currentTool = Tool.STICKY_NOTE; }
 
     @FXML private void handleClearCanvas(ActionEvent event) { collaborationService.send("CLEAR"); }
+
+    // Template Methods
+    @FXML private void handleBrainstormingTemplate(ActionEvent event) {
+        // TODO: Load brainstorming template
+        System.out.println("Loading brainstorming template...");
+    }
+
+    @FXML private void handleMindMapTemplate(ActionEvent event) {
+        // TODO: Load mind map template
+        System.out.println("Loading mind map template...");
+    }
+
+    @FXML private void handleKanbanTemplate(ActionEvent event) {
+        // TODO: Load kanban template
+        System.out.println("Loading kanban template...");
+    }
+
+    @FXML private void handleFlowchartTemplate(ActionEvent event) {
+        // TODO: Load flowchart template
+        System.out.println("Loading flowchart template...");
+    }
+
+    @FXML private void handleUserJourneyTemplate(ActionEvent event) {
+        // TODO: Load user journey template
+        System.out.println("Loading user journey template...");
+    }
+
+    @FXML private void handleTimelineTemplate(ActionEvent event) {
+        // TODO: Load timeline template
+        System.out.println("Loading timeline template...");
+    }
+
+    // Collaboration Methods
+    @FXML private void handleAddCollaborator(ActionEvent event) {
+        // TODO: Show add collaborator dialog
+        System.out.println("Adding collaborator...");
+    }
+
+    @FXML private void handleShare(ActionEvent event) {
+        // TODO: Show share dialog
+        System.out.println("Sharing room...");
+    }
+
+    @FXML private void handleSettings(ActionEvent event) {
+        // TODO: Show settings dialog
+        System.out.println("Opening settings...");
+    }
+
+    @FXML private void handleInviteOthers(ActionEvent event) {
+        // TODO: Show invite dialog
+        System.out.println("Inviting others...");
+    }
+
+    // Floating Action Button Methods
+    @FXML private void handleFAB(ActionEvent event) {
+        // TODO: Show quick action menu
+        System.out.println("FAB clicked - showing quick actions...");
+    }
+
+    @FXML private void handleImageUpload(ActionEvent event) {
+        // TODO: Show image upload dialog
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Upload Image");
+        fileChooser.getExtensionFilters().addAll(
+            new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
+        );
+        File file = fileChooser.showOpenDialog(canvas.getScene().getWindow());
+        if (file != null) {
+            System.out.println("Selected image: " + file.getName());
+            // TODO: Implement image loading and positioning on canvas
+        }
+    }
+
+    @FXML private void handleLayers(ActionEvent event) {
+        // TODO: Show layers panel
+        System.out.println("Opening layers panel...");
+    }
+
+    // Close Button Methods
+    @FXML private void handleCloseTemplates(ActionEvent event) {
+        templatesContainer.setVisible(false);
+    }
+
+    @FXML private void handleCloseActivity(ActionEvent event) {
+        activityList.getParent().setVisible(false);
+    }
+
+    @FXML private void handleCloseParticipants(ActionEvent event) {
+        participantsList.getParent().setVisible(false);
+    }
+
+    @FXML private void handleCloseVersion(ActionEvent event) {
+        versionHistoryList.getParent().setVisible(false);
+    }
 
     @FXML
     private void handleExitRoom(ActionEvent event) throws IOException {
@@ -110,6 +288,33 @@ public class WhiteboardController {
         String data = String.format("CHAT:%s: %s", username, message);
         collaborationService.send(data);
         chatTextField.clear();
+    }
+
+    // Zoom Control Methods
+    @FXML private void handleZoomChange() {
+        if (zoomSlider != null) {
+            double zoomValue = zoomSlider.getValue();
+            currentZoom = zoomValue / 100.0;
+            updateZoomLabel();
+            applyZoomToCanvas();
+        }
+    }
+
+    private void updateZoomLabel() {
+        if (zoomLabel != null) {
+            zoomLabel.setText(String.format("Zoom: %.0f%%", currentZoom * 100));
+        }
+    }
+
+    private void applyZoomToCanvas() {
+        if (canvas != null) {
+            if (scaleTransform == null) {
+                scaleTransform = new Scale();
+                canvas.getTransforms().add(scaleTransform);
+            }
+            scaleTransform.setX(currentZoom);
+            scaleTransform.setY(currentZoom);
+        }
     }
 
     @FXML
@@ -176,6 +381,112 @@ public class WhiteboardController {
     private void handleRedo(ActionEvent event) {
         if (!redoHistory.isEmpty()) {
             collaborationService.send("REDO");
+        }
+    }
+
+    // --- UI SETUP HELPER METHODS ---
+
+    private void setupZoomControls() {
+        if (zoomSlider != null) {
+            zoomSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+                currentZoom = newVal.doubleValue() / 100.0;
+                updateZoomLabel();
+                applyZoomToCanvas();
+            });
+            updateZoomLabel();
+        }
+    }
+
+    private void setupToolGroup() {
+        if (toolGroup != null && penTool != null) {
+            penTool.setSelected(true);
+            currentTool = Tool.PEN;
+        }
+    }
+
+    private void setupCanvasEventHandlers() {
+        canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, this::handleMousePressed);
+        canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, this::handleMouseDragged);
+        canvas.addEventHandler(MouseEvent.MOUSE_RELEASED, this::handleMouseReleased);
+    }
+
+    private void initializeUIComponents() {
+        // Initialize collaborator count
+        if (collaboratorCountLabel != null) {
+            collaboratorCountLabel.setText("1 collaborator");
+        }
+
+        // Initialize activity list with sample data
+        initializeActivityList();
+
+        // Initialize participants list
+        initializeParticipantsList();
+
+        // Initialize version history
+        initializeVersionHistory();
+    }
+
+    private void initializeActivityList() {
+        if (activityList != null) {
+            // Add sample activity items - in real implementation, this would come from backend
+            addActivityItem("You joined the session", "Just now");
+            addActivityItem("Canvas cleared", "2 min ago");
+            addActivityItem("New drawing added", "5 min ago");
+        }
+    }
+
+    private void initializeParticipantsList() {
+        if (participantsList != null) {
+            // Add current user - in real implementation, this would come from backend
+            String currentUsername = sessionManager.getCurrentUser().getUsername();
+            addParticipant(currentUsername, true);
+        }
+    }
+
+    private void initializeVersionHistory() {
+        if (versionHistoryList != null) {
+            // Add sample version history - in real implementation, this would come from backend
+            addVersionHistoryItem("Current Version", "Now", true);
+            addVersionHistoryItem("Auto-save #3", "5 min ago", false);
+            addVersionHistoryItem("Auto-save #2", "10 min ago", false);
+        }
+    }
+
+    // Helper methods for dynamic UI updates
+    private void addActivityItem(String activity, String time) {
+        if (activityList != null) {
+            Label activityLabel = new Label(activity);
+            activityLabel.setStyle("-fx-font-size: 12; -fx-text-fill: #333;");
+            Label timeLabel = new Label(time);
+            timeLabel.setStyle("-fx-font-size: 10; -fx-text-fill: #666;");
+            VBox activityItem = new VBox(2, activityLabel, timeLabel);
+            activityItem.setStyle("-fx-padding: 8; -fx-background-color: #f9f9f9; -fx-background-radius: 4;");
+            activityList.getChildren().add(activityItem);
+        }
+    }
+
+    private void addParticipant(String username, boolean isCurrentUser) {
+        if (participantsList != null) {
+            Label nameLabel = new Label(username + (isCurrentUser ? " (You)" : ""));
+            nameLabel.setStyle("-fx-font-size: 13; -fx-font-weight: " + (isCurrentUser ? "bold" : "normal") + ";");
+            Label statusLabel = new Label("Online");
+            statusLabel.setStyle("-fx-font-size: 10; -fx-text-fill: #4caf50;");
+            VBox participantItem = new VBox(2, nameLabel, statusLabel);
+            participantItem.setStyle("-fx-padding: 8;");
+            participantsList.getChildren().add(participantItem);
+        }
+    }
+
+    private void addVersionHistoryItem(String version, String time, boolean isCurrent) {
+        if (versionHistoryList != null) {
+            Label versionLabel = new Label(version);
+            versionLabel.setStyle("-fx-font-size: 12; -fx-font-weight: " + (isCurrent ? "bold" : "normal") + ";");
+            Label timeLabel = new Label(time);
+            timeLabel.setStyle("-fx-font-size: 10; -fx-text-fill: #666;");
+            VBox versionItem = new VBox(2, versionLabel, timeLabel);
+            String bgColor = isCurrent ? "#e3f2fd" : "#f9f9f9";
+            versionItem.setStyle("-fx-padding: 8; -fx-background-color: " + bgColor + "; -fx-background-radius: 4; -fx-cursor: hand;");
+            versionHistoryList.getChildren().add(versionItem);
         }
     }
 
