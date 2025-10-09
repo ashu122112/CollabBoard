@@ -38,6 +38,12 @@ public class CollaborationService {
         System.out.println("Attempting to connect to host at " + ipAddress + ":" + port);
     }
 
+    public void kickUser(String username) {
+        if (isHost()) {
+            host.kickUser(username);
+        }
+    }
+
     private void receiveDataFromServer(String data) {
         if (onDataReceived != null) {
             Platform.runLater(() -> onDataReceived.accept(data));

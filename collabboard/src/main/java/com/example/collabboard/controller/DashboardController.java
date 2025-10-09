@@ -72,29 +72,31 @@ public class DashboardController {
             messageLabel.setText("Please enter the Host's IP Address.");
             return;
         }
-        
+
         messageLabel.setText("Connecting to " + ipAddress + "...");
 
         // Use the improved connectToHost method with callbacks
         collaborationService.connectToHost(ipAddress.trim(), 12345,
-            // On Success:
-            () -> {
-                // Store the IP in the central service
-                collaborationService.setCurrentRoomIdentifier(ipAddress.trim());
-                // Navigate to the whiteboard on the JavaFX thread
-                Platform.runLater(() -> {
-                    try {
-                        SceneManager.switchScene(event, "WhiteboardView.fxml", "CollabBoard", applicationContext);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
-            },
-            // On Failure:
-            (exception) -> Platform.runLater(() -> {
-                messageLabel.setStyle("-fx-text-fill: red;");
-                messageLabel.setText("Failed to connect: " + exception.getMessage());
-            })
+                // On Success:
+                () -> {
+                    // Store the IP in the central service
+                    collaborationService.setCurrentRoomIdentifier(ipAddress.trim());
+
+                    collaborationService.send("IDENTIFY:" + sessionManager.getCurrentUser().getUsername());
+                    // Navigate to the whiteboard on the JavaFX thread
+                    Platform.runLater(() -> {
+                        try {
+                            SceneManager.switchScene(event, "WhiteboardView.fxml", "CollabBoard", applicationContext);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                },
+                // On Failure:
+                (exception) -> Platform.runLater(() -> {
+                    messageLabel.setStyle("-fx-text-fill: red;");
+                    messageLabel.setText("Failed to connect: " + exception.getMessage());
+                })
         );
     }
 

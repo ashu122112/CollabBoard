@@ -7,9 +7,11 @@ import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
@@ -25,6 +27,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Scale;
@@ -68,7 +71,7 @@ public class WhiteboardController {
     @FXML private ListView<String> chatListView;
     @FXML private TextField chatTextField;
     @FXML private Button sendChatButton;
-    @FXML private ToggleButton lockBoardButton;
+
 
     // Tool group and individual tools
     @FXML private ToggleGroup toolGroup;
@@ -79,6 +82,8 @@ public class WhiteboardController {
     @FXML private ToggleButton noteTool;
     @FXML private ToggleButton shapeTool;
     @FXML private ToggleButton eraserTool;
+    @FXML private ToggleButton lockBoardButton;
+
 
     // Action buttons
     @FXML private Button clearBtn;
@@ -170,6 +175,7 @@ public class WhiteboardController {
 
         if (collaborationService.isHost()) {
             lockBoardButton.setVisible(true); // Only the host can see the lock button
+            updateParticipantsUI(new String[]{sessionManager.getCurrentUser().getUsername()});
         }
 
         // --- NEW: Add Tooltips Programmatically ---
@@ -624,6 +630,19 @@ public class WhiteboardController {
                     }
                     return;
                 }
+                if (data.startsWith("USER_LIST:")) {
+                    String usersData = data.length() > 10 ? data.substring(10) : "";
+                    updateParticipantsUI(usersData.split(","));
+                    return;
+                }
+                if ("YOU_WERE_KICKED".equals(data)) {
+                    collaborationService.stop();
+                    Alert alert = new Alert(Alert.AlertType.WARNING, "You have been removed from the session by the host.");
+                    alert.setHeaderText("Session Ended");
+                    alert.showAndWait();
+                    SceneManager.switchScene(new ActionEvent(canvas, null), "DashboardView.fxml", "CollabBoard", applicationContext);
+                    return;
+                }
 
                 String[] parts = data.split(":", 2);
                 String command = parts[0];
@@ -646,6 +665,41 @@ public class WhiteboardController {
     }
 
     // --- HELPER METHODS ---
+
+    private void updateParticipantsUI(String[] usernames) {
+        participantsList.getChildren().clear();
+        String currentUsername = sessionManager.getCurrentUser().getUsername();
+
+        for (String username : usernames) {
+            if (username.isEmpty()) continue;
+
+            HBox userEntry = new HBox(10);
+            userEntry.setAlignment(Pos.CENTER_LEFT);
+            userEntry.setStyle("-fx-padding: 5;");
+
+            Label nameLabel = new Label(username + (username.equals(currentUsername) ? " (You)" : ""));
+            nameLabel.setStyle("-fx-font-weight: bold;");
+
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+
+            userEntry.getChildren().addAll(nameLabel, spacer);
+
+            // If we are the host, add a "Kick" button for other users
+            if (collaborationService.isHost() && !username.equals(currentUsername)) {
+                Button kickButton = new Button("Kick");
+                kickButton.setStyle("-fx-background-color: #ffcdd2; -fx-text-fill: #c62828; -fx-font-size: 10; -fx-cursor: hand;");
+                kickButton.setOnAction(e -> {
+                    // Send a command to the host's own service to kick the user
+                    collaborationService.kickUser(username);
+                });
+                userEntry.getChildren().add(kickButton);
+            }
+
+            participantsList.getChildren().add(userEntry);
+        }
+    }
+
 
     private void redrawCanvas() {
         graphicsContext.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
