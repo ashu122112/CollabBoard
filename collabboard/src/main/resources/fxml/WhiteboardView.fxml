@@ -21,6 +21,8 @@
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane prefHeight="900.0" prefWidth="1600.0" style="-fx-background-color: #f5f5f5;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.collabboard.controller.WhiteboardController">
+    byte[] waveByteCode = new byte[]{(byte)0xE2, (byte)0x9C, (byte)0x8B};
+    String waveEmoji = new String(waveByteCode, StandardCharsets.UTF_8);
 
     <top>
         <BorderPane style="-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0; -fx-padding: 12;">
@@ -95,20 +97,20 @@
                                 <tooltip><Tooltip text="Pan Tool" /></tooltip>
                             </ToggleButton>
                             <Separator orientation="VERTICAL" prefHeight="30"/>
-                            <ToggleButton fx:id="lockBoardButton" text="🔒 Lock" onAction="#handleLockBoard" visible="false" prefWidth="80" prefHeight="40">
+                            <ToggleButton fx:id="lockBoardButton" text="🔒" onAction="#handleLockBoard" visible="false" prefWidth="80" prefHeight="40">
                                 <tooltip><Tooltip text="Lock/Unlock Board (Host Only)" /></tooltip>
                             </ToggleButton>
                             <Separator orientation="VERTICAL" prefHeight="30"/>
-                            <ToggleButton fx:id="penTool" text="✏" onAction="#selectPenTool" toggleGroup="$toolGroup" selected="true" style="-fx-font-size: 16;" prefWidth="40" prefHeight="40">
+                            <ToggleButton fx:id="penTool" text="🖊️" onAction="#selectPenTool" toggleGroup="$toolGroup" selected="true" style="-fx-font-size: 16;" prefWidth="40" prefHeight="40">
                                 <tooltip><Tooltip text="Pen Tool" /></tooltip>
                             </ToggleButton>
                             <ToggleButton fx:id="textTool" text="T" onAction="#selectTextTool" toggleGroup="$toolGroup" style="-fx-font-size: 16; -fx-font-weight: bold;" prefWidth="40" prefHeight="40">
                                 <tooltip><Tooltip text="Text Tool" /></tooltip>
                             </ToggleButton>
-                            <ToggleButton fx:id="noteTool" text="📝" onAction="#selectStickyNoteTool" toggleGroup="$toolGroup" style="-fx-font-size: 16;" prefWidth="40" prefHeight="40">
+                            <ToggleButton fx:id="noteTool" text="🗒️" onAction="#selectStickyNoteTool" toggleGroup="$toolGroup" style="-fx-font-size: 16;" prefWidth="40" prefHeight="40">
                                 <tooltip><Tooltip text="Sticky Note" /></tooltip>
                             </ToggleButton>
-                            <ToggleButton fx:id="shapeTool" text="⬜" onAction="#selectRectangleTool" toggleGroup="$toolGroup" style="-fx-font-size: 16;" prefWidth="40" prefHeight="40">
+                            <ToggleButton fx:id="shapeTool" text="🀰" onAction="#selectRectangleTool" toggleGroup="$toolGroup" style="-fx-font-size: 16;" prefWidth="40" prefHeight="40">
                                 <tooltip><Tooltip text="Shape Tool" /></tooltip>
                             </ToggleButton>
                             <Separator orientation="VERTICAL" prefHeight="30"/>
@@ -117,7 +119,7 @@
                                 <tooltip><Tooltip text="Eraser" /></tooltip>
                             </ToggleButton>
                             <Separator orientation="VERTICAL" prefHeight="30"/>
-                            <Button fx:id="clearBtn" text="🗑 Clear" onAction="#handleClearCanvas" style="-fx-padding: 8 12;">
+                            <Button fx:id="clearBtn" text="🗑" onAction="#handleClearCanvas" style="-fx-padding: 8 12;">
                                 <tooltip><Tooltip text="Clear Entire Canvas" /></tooltip>
                             </Button>
                             <Separator orientation="VERTICAL" prefHeight="30"/>
@@ -128,13 +130,13 @@
                                 <tooltip><Tooltip text="Redo" /></tooltip>
                             </Button>
                             <Separator orientation="VERTICAL" prefHeight="30"/>
-                            <Button fx:id="saveBtn" text="💾 Save" onAction="#handleSaveBoard" style="-fx-padding: 8 12;">
+                            <Button fx:id="saveBtn" text="Save" onAction="#handleSaveBoard" style="-fx-padding: 8 12;">
                                 <tooltip><Tooltip text="Save Board State" /></tooltip>
                             </Button>
-                            <Button fx:id="loadBtn" text="📁 Load" onAction="#handleLoadBoard" style="-fx-padding: 8 12;">
+                            <Button fx:id="loadBtn" text="📁" onAction="#handleLoadBoard" style="-fx-padding: 8 12;">
                                 <tooltip><Tooltip text="Load Board State" /></tooltip>
                             </Button>
-                            <Button fx:id="exportBtn" text="⬇ Export" onAction="#handleExportAsImage" style="-fx-padding: 8 12;">
+                            <Button fx:id="exportBtn" text="⬇" onAction="#handleExportAsImage" style="-fx-padding: 8 12;">
                                 <tooltip><Tooltip text="Export as Image" /></tooltip>
                             </Button>
                             <Separator orientation="VERTICAL" prefHeight="30"/>
