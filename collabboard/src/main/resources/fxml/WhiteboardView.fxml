@@ -12,265 +12,174 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.shape.Circle?>
-<?import javafx.scene.text.Font?>
 
 <BorderPane prefHeight="900.0" prefWidth="1600.0" style="-fx-background-color: #f5f5f5;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.collabboard.controller.WhiteboardController">
-    
-    <!-- TOP HEADER BAR -->
+
     <top>
         <BorderPane style="-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0; -fx-padding: 12;">
             <left>
                 <HBox alignment="CENTER_LEFT" spacing="15">
-                    <!-- App Logo/Icon -->
                     <StackPane style="-fx-background-color: #6366f1; -fx-background-radius: 8;" prefHeight="40" prefWidth="40">
                         <Label text="CB" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14;"/>
                     </StackPane>
-                    
                     <Label text="CollabBoard" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
-                    
                     <Separator orientation="VERTICAL" prefHeight="30"/>
-                    
-                    <!-- Collaborators Info - NEW FEATURE, BACKEND NEEDED -->
                     <HBox fx:id="collaboratorsBox" alignment="CENTER_LEFT" spacing="5" style="-fx-cursor: hand;">
-                        <!-- Avatar circles will be added programmatically -->
-                        <Label fx:id="collaboratorCountLabel" text="3 collaborators" style="-fx-text-fill: #666; -fx-font-size: 13;"/>
+                        <Label fx:id="collaboratorCountLabel" text="1 collaborator" style="-fx-text-fill: #666; -fx-font-size: 13;"/>
                     </HBox>
-                    
-                    <!-- Add Collaborator Button - NEW FEATURE, BACKEND NEEDED -->
-                    <Button fx:id="addCollaboratorBtn" text="+" style="-fx-background-color: #f0f0f0; -fx-background-radius: 20; -fx-cursor: hand; -fx-font-size: 16; -fx-font-weight: bold;" prefWidth="32" prefHeight="32" onAction="#handleAddCollaborator"/>
+                    <Button fx:id="addCollaboratorBtn" text="+" onAction="#handleAddCollaborator" style="-fx-background-color: #f0f0f0; -fx-background-radius: 20; -fx-cursor: hand; -fx-font-size: 16; -fx-font-weight: bold;" prefWidth="32" prefHeight="32">
+                        <tooltip><Tooltip text="Add Collaborators" /></tooltip>
+                    </Button>
                 </HBox>
             </left>
-            
+
             <right>
                 <HBox alignment="CENTER_RIGHT" spacing="10">
-                    <!-- Room Code Label -->
-                    <Label fx:id="roomCodeLabel" text="Room: WB-2024" style="-fx-font-size: 13; -fx-text-fill: #666; -fx-background-color: #f0f0f0; -fx-padding: 6 12; -fx-background-radius: 6;"/>
-                    
-                    <!-- Share Button -->
-                    <Button fx:id="shareButton" text="⬆ Share" style="-fx-background-color: #6366f1; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 16; -fx-font-weight: bold; -fx-cursor: hand;" onAction="#handleShare"/>
-                    
-                    <!-- Settings Button - NEW FEATURE, BACKEND MAY BE NEEDED -->
-                    <Button fx:id="settingsButton" text="⚙" style="-fx-background-color: transparent; -fx-text-fill: #666; -fx-font-size: 18; -fx-cursor: hand; -fx-background-radius: 6;" prefWidth="36" prefHeight="36" onAction="#handleSettings"/>
+                    <Label fx:id="roomCodeLabel" text="Room: ..." style="-fx-font-size: 13; -fx-text-fill: #666; -fx-background-color: #f0f0f0; -fx-padding: 6 12; -fx-background-radius: 6;"/>
+                    <Button fx:id="shareButton" text="⬆ Share" onAction="#handleShare" style="-fx-background-color: #6366f1; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 16; -fx-font-weight: bold; -fx-cursor: hand;">
+                        <tooltip><Tooltip text="Share Room Info" /></tooltip>
+                    </Button>
+                    <Button fx:id="settingsButton" text="⚙" onAction="#handleSettings" style="-fx-background-color: transparent; -fx-text-fill: #666; -fx-font-size: 18; -fx-cursor: hand; -fx-background-radius: 6;" prefWidth="36" prefHeight="36">
+                        <tooltip><Tooltip text="Settings" /></tooltip>
+                    </Button>
                 </HBox>
             </right>
         </BorderPane>
     </top>
-    
+
     <center>
         <BorderPane>
-            <!-- LEFT SIDEBAR -->
             <left>
                 <VBox style="-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-width: 0 1 0 0;" prefWidth="280" spacing="0">
-                    
-                    <!-- Quick Templates Section - NEW FEATURE, BACKEND NEEDED FOR TEMPLATE STORAGE -->
                     <VBox spacing="10" style="-fx-padding: 15;">
                         <HBox alignment="CENTER_LEFT">
                             <Label text="Quick Templates" style="-fx-font-size: 14; -fx-font-weight: bold;"/>
                             <Region HBox.hgrow="ALWAYS"/>
-                            <Button fx:id="closeTemplatesBtn" text="✕" style="-fx-background-color: transparent; -fx-text-fill: #999; -fx-cursor: hand;" onAction="#handleCloseTemplates"/>
+                            <Button fx:id="closeTemplatesBtn" text="✕" onAction="#handleCloseTemplates" style="-fx-background-color: transparent; -fx-text-fill: #999; -fx-cursor: hand;"/>
                         </HBox>
-                        
-                        <!-- Template Grid -->
                         <VBox spacing="10" fx:id="templatesContainer">
-                            <HBox spacing="10">
-                                <Button fx:id="brainstormingTemplate" text="💡\nBrainstorming" style="-fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 15; -fx-cursor: hand; -fx-alignment: center;" prefWidth="120" prefHeight="80" onAction="#handleBrainstormingTemplate"/>
-                                <Button fx:id="mindMapTemplate" text="🔗\nMind Map" style="-fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 15; -fx-cursor: hand; -fx-alignment: center;" prefWidth="120" prefHeight="80" onAction="#handleMindMapTemplate"/>
-                            </HBox>
-                            <HBox spacing="10">
-                                <Button fx:id="kanbanTemplate" text="📋\nKanban Board" style="-fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 15; -fx-cursor: hand; -fx-alignment: center;" prefWidth="120" prefHeight="80" onAction="#handleKanbanTemplate"/>
-                                <Button fx:id="flowchartTemplate" text="🔀\nFlowchart" style="-fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 15; -fx-cursor: hand; -fx-alignment: center;" prefWidth="120" prefHeight="80" onAction="#handleFlowchartTemplate"/>
-                            </HBox>
-                            <HBox spacing="10">
-                                <Button fx:id="userJourneyTemplate" text="👥\nUser Journey" style="-fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 15; -fx-cursor: hand; -fx-alignment: center;" prefWidth="120" prefHeight="80" onAction="#handleUserJourneyTemplate"/>
-                                <Button fx:id="timelineTemplate" text="📅\nTimeline" style="-fx-background-color: #f9f9f9; -fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 15; -fx-cursor: hand; -fx-alignment: center;" prefWidth="120" prefHeight="80" onAction="#handleTimelineTemplate"/>
-                            </HBox>
                         </VBox>
                     </VBox>
-                    
                     <Separator/>
-                    
-                    <!-- Recent Activity Section - NEW FEATURE, BACKEND NEEDED -->
                     <VBox spacing="10" style="-fx-padding: 15;" VBox.vgrow="ALWAYS">
                         <HBox alignment="CENTER_LEFT">
                             <Label text="Recent Activity" style="-fx-font-size: 14; -fx-font-weight: bold;"/>
                             <Region HBox.hgrow="ALWAYS"/>
-                            <Button fx:id="closeActivityBtn" text="✕" style="-fx-background-color: transparent; -fx-text-fill: #999; -fx-cursor: hand;" onAction="#handleCloseActivity"/>
+                            <Button fx:id="closeActivityBtn" text="✕" onAction="#handleCloseActivity" style="-fx-background-color: transparent; -fx-text-fill: #999; -fx-cursor: hand;"/>
                         </HBox>
-                        
                         <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
-                            <VBox fx:id="activityList" spacing="12" style="-fx-padding: 5;">
-                                <!-- Activity items will be added programmatically -->
-                            </VBox>
+                            <VBox fx:id="activityList" spacing="12" style="-fx-padding: 5;"/>
                         </ScrollPane>
                     </VBox>
                 </VBox>
             </left>
-            
-            <!-- CENTER CANVAS AREA -->
+
             <center>
                 <StackPane style="-fx-background-color: #f5f5f5;">
-                    <!-- Toolbar -->
                     <VBox alignment="TOP_CENTER" StackPane.alignment="TOP_CENTER">
                         <HBox alignment="CENTER" spacing="8" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 10 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
-                            <padding>
-                                <Insets top="15" right="0" bottom="0" left="0"/>
-                            </padding>
-                            
-                            <fx:define>
-                                <ToggleGroup fx:id="toolGroup"/>
-                            </fx:define>
-                            
-                            <!-- Selection Tool - EXISTING -->
-                            <ToggleButton fx:id="selectTool" text="↖" style="-fx-background-color: #f0f0f0; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-size: 16;" prefWidth="40" prefHeight="40" toggleGroup="$toolGroup" onAction="#selectSelectionTool"/>
-                            
-                            <!-- Hand Tool - NEW FEATURE, MAY NEED BACKEND FOR PAN STATE SYNC -->
-                            <ToggleButton fx:id="handTool" text="✋" style="-fx-background-color: #f0f0f0; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-size: 16;" prefWidth="40" prefHeight="40" toggleGroup="$toolGroup" onAction="#selectHandTool"/>
-                            
+                            <padding><Insets top="15" right="0" bottom="0" left="0"/></padding>
+                            <fx:define><ToggleGroup fx:id="toolGroup"/></fx:define>
+
+                            <ToggleButton fx:id="selectTool" text="↖️" onAction="#selectSelectionTool" toggleGroup="$toolGroup" style="-fx-font-size: 16;" prefWidth="40" prefHeight="40">
+                                <tooltip><Tooltip text="Select Tool" /></tooltip>
+                            </ToggleButton>
+                            <ToggleButton fx:id="handTool" text="✋" onAction="#selectHandTool" toggleGroup="$toolGroup" style="-fx-font-size: 16;" prefWidth="40" prefHeight="40">
+                                <tooltip><Tooltip text="Pan Tool" /></tooltip>
+                            </ToggleButton>
                             <Separator orientation="VERTICAL" prefHeight="30"/>
-                            
-                            <!-- Pen Tool - EXISTING -->
-                            <ToggleButton fx:id="penTool" text="✏" style="-fx-background-color: #f0f0f0; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-size: 16;" prefWidth="40" prefHeight="40" toggleGroup="$toolGroup" selected="true" onAction="#selectPenTool"/>
-                            
-                            <!-- Text Tool - NEW FEATURE, BACKEND NEEDED FOR TEXT OBJECTS -->
-                            <ToggleButton fx:id="textTool" text="T" style="-fx-background-color: #f0f0f0; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-size: 16; -fx-font-weight: bold;" prefWidth="40" prefHeight="40" toggleGroup="$toolGroup" onAction="#selectTextTool"/>
-                            
-                            <!-- Note Tool - EXISTING (Sticky Note) -->
-                            <ToggleButton fx:id="noteTool" text="📝" style="-fx-background-color: #f0f0f0; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-size: 16;" prefWidth="40" prefHeight="40" toggleGroup="$toolGroup" onAction="#selectStickyNoteTool"/>
-                            
-                            <!-- Shape Tool Dropdown - EXISTING (Rectangle/Oval) -->
-                            <ToggleButton fx:id="shapeTool" text="⬜" style="-fx-background-color: #f0f0f0; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-size: 16;" prefWidth="40" prefHeight="40" toggleGroup="$toolGroup" onAction="#selectRectangleTool"/>
-                            
+                            <ToggleButton fx:id="lockBoardButton" text="🔒 Lock" onAction="#handleLockBoard" visible="false" prefWidth="80" prefHeight="40">
+                                <tooltip><Tooltip text="Lock/Unlock Board (Host Only)" /></tooltip>
+                            </ToggleButton>
                             <Separator orientation="VERTICAL" prefHeight="30"/>
-                            
-                            <!-- Color Picker - EXISTING -->
-                            <ColorPicker fx:id="colorPicker" style="-fx-background-radius: 8; -fx-cursor: hand;" prefWidth="100"/>
-                            
-                            <!-- Eraser - EXISTING -->
-                            <ToggleButton fx:id="eraserTool" text="🧹" style="-fx-background-color: #f0f0f0; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-size: 16;" prefWidth="40" prefHeight="40" toggleGroup="$toolGroup" onAction="#selectEraserTool"/>
-                            
+                            <ToggleButton fx:id="penTool" text="✏" onAction="#selectPenTool" toggleGroup="$toolGroup" selected="true" style="-fx-font-size: 16;" prefWidth="40" prefHeight="40">
+                                <tooltip><Tooltip text="Pen Tool" /></tooltip>
+                            </ToggleButton>
+                            <ToggleButton fx:id="textTool" text="T" onAction="#selectTextTool" toggleGroup="$toolGroup" style="-fx-font-size: 16; -fx-font-weight: bold;" prefWidth="40" prefHeight="40">
+                                <tooltip><Tooltip text="Text Tool" /></tooltip>
+                            </ToggleButton>
+                            <ToggleButton fx:id="noteTool" text="📝" onAction="#selectStickyNoteTool" toggleGroup="$toolGroup" style="-fx-font-size: 16;" prefWidth="40" prefHeight="40">
+                                <tooltip><Tooltip text="Sticky Note" /></tooltip>
+                            </ToggleButton>
+                            <ToggleButton fx:id="shapeTool" text="⬜" onAction="#selectRectangleTool" toggleGroup="$toolGroup" style="-fx-font-size: 16;" prefWidth="40" prefHeight="40">
+                                <tooltip><Tooltip text="Shape Tool" /></tooltip>
+                            </ToggleButton>
                             <Separator orientation="VERTICAL" prefHeight="30"/>
-                            
-                            <!-- Clear Canvas - EXISTING -->
-                            <Button fx:id="clearBtn" text="🗑 Clear Canvas" style="-fx-background-color: #fee; -fx-text-fill: #c00; -fx-background-radius: 8; -fx-cursor: hand; -fx-padding: 8 12;" onAction="#handleClearCanvas"/>
-                            
+                            <ColorPicker fx:id="colorPicker" prefWidth="100"/>
+                            <ToggleButton fx:id="eraserTool" text="🧹" onAction="#selectEraserTool" toggleGroup="$toolGroup" style="-fx-font-size: 16;" prefWidth="40" prefHeight="40">
+                                <tooltip><Tooltip text="Eraser" /></tooltip>
+                            </ToggleButton>
                             <Separator orientation="VERTICAL" prefHeight="30"/>
-                            
-                            <!-- Undo/Redo - EXISTING -->
-                            <Button fx:id="undoBtn" text="↶" style="-fx-background-color: #f0f0f0; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-size: 18;" prefWidth="40" prefHeight="40" onAction="#handleUndo"/>
-                            <Button fx:id="redoBtn" text="↷" style="-fx-background-color: #f0f0f0; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-size: 18;" prefWidth="40" prefHeight="40" onAction="#handleRedo"/>
-                            
+                            <Button fx:id="clearBtn" text="🗑 Clear" onAction="#handleClearCanvas" style="-fx-padding: 8 12;">
+                                <tooltip><Tooltip text="Clear Entire Canvas" /></tooltip>
+                            </Button>
                             <Separator orientation="VERTICAL" prefHeight="30"/>
-                            
-                            <!-- Save/Load/Export - EXISTING -->
-                            <Button fx:id="saveBtn" text="💾 Save" style="-fx-background-color: #f0f0f0; -fx-background-radius: 8; -fx-cursor: hand; -fx-padding: 8 12;" onAction="#handleSaveBoard"/>
-                            <Button fx:id="loadBtn" text="📁 Load" style="-fx-background-color: #f0f0f0; -fx-background-radius: 8; -fx-cursor: hand; -fx-padding: 8 12;" onAction="#handleLoadBoard"/>
-                            <Button fx:id="exportBtn" text="⬇ Export" style="-fx-background-color: #f0f0f0; -fx-background-radius: 8; -fx-cursor: hand; -fx-padding: 8 12;" onAction="#handleExportAsImage"/>
-                            
+                            <Button fx:id="undoBtn" text="↶" onAction="#handleUndo" style="-fx-font-size: 18;" prefWidth="40" prefHeight="40">
+                                <tooltip><Tooltip text="Undo" /></tooltip>
+                            </Button>
+                            <Button fx:id="redoBtn" text="↷" onAction="#handleRedo" style="-fx-font-size: 18;" prefWidth="40" prefHeight="40">
+                                <tooltip><Tooltip text="Redo" /></tooltip>
+                            </Button>
                             <Separator orientation="VERTICAL" prefHeight="30"/>
-                            
-                            <!-- Zoom Controls - NEW FEATURE, LOCAL ONLY -->
-                            <HBox alignment="CENTER" spacing="8" style="-fx-background-color: #f9f9f9; -fx-background-radius: 8; -fx-padding: 5 10;">
-                                <Label fx:id="zoomLabel" text="Zoom: 100%" style="-fx-font-size: 12; -fx-text-fill: #666;"/>
-                                <Slider fx:id="zoomSlider" min="10" max="200" value="100" prefWidth="100" onValueChange="#handleZoomChange"/>
+                            <Button fx:id="saveBtn" text="💾 Save" onAction="#handleSaveBoard" style="-fx-padding: 8 12;">
+                                <tooltip><Tooltip text="Save Board State" /></tooltip>
+                            </Button>
+                            <Button fx:id="loadBtn" text="📁 Load" onAction="#handleLoadBoard" style="-fx-padding: 8 12;">
+                                <tooltip><Tooltip text="Load Board State" /></tooltip>
+                            </Button>
+                            <Button fx:id="exportBtn" text="⬇ Export" onAction="#handleExportAsImage" style="-fx-padding: 8 12;">
+                                <tooltip><Tooltip text="Export as Image" /></tooltip>
+                            </Button>
+                            <Separator orientation="VERTICAL" prefHeight="30"/>
+                            <HBox alignment="CENTER" spacing="8">
+                                <Label fx:id="zoomLabel" text="100%" />
+                                <Slider fx:id="zoomSlider" min="10" max="200" value="100" prefWidth="100"/>
                             </HBox>
-                            
-                            <!-- Layers Button - NEW FEATURE, BACKEND NEEDED FOR LAYER MANAGEMENT -->
-                            <Button fx:id="layersBtn" text="📚 Layers" style="-fx-background-color: #f0f0f0; -fx-background-radius: 8; -fx-cursor: hand; -fx-padding: 8 12;" onAction="#handleLayers"/>
                         </HBox>
                     </VBox>
-                    
-                    <!-- Canvas Container -->
                     <AnchorPane fx:id="canvasPane" style="-fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);">
-                        <StackPane.margin>
-                            <Insets top="80" right="20" bottom="20" left="20"/>
-                        </StackPane.margin>
+                        <StackPane.margin><Insets top="80" right="20" bottom="20" left="20"/></StackPane.margin>
                         <Canvas fx:id="canvas" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
                     </AnchorPane>
-                    
-                    <!-- Floating Action Button - NEW FEATURE, BACKEND MAY BE NEEDED -->
-                    <Button fx:id="fabBtn" text="+" style="-fx-background-color: #6366f1; -fx-text-fill: white; -fx-background-radius: 30; -fx-font-size: 24; -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 3);" prefWidth="56" prefHeight="56" StackPane.alignment="BOTTOM_RIGHT" onAction="#handleFAB">
-                        <StackPane.margin>
-                            <Insets right="30" bottom="30"/>
-                        </StackPane.margin>
-                    </Button>
-                    
-                    <!-- Image Upload Button - NEW FEATURE, BACKEND NEEDED -->
-                    <Button fx:id="imageUploadBtn" text="🖼" style="-fx-background-color: white; -fx-background-radius: 25; -fx-font-size: 20; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 8, 0, 0, 2);" prefWidth="50" prefHeight="50" StackPane.alignment="BOTTOM_RIGHT" onAction="#handleImageUpload">
-                        <StackPane.margin>
-                            <Insets right="30" bottom="100"/>
-                        </StackPane.margin>
-                    </Button>
                 </StackPane>
             </center>
-            
-            <!-- RIGHT SIDEBAR -->
+
             <right>
                 <VBox style="-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 0 1;" prefWidth="340" spacing="0">
-                    
-                    <!-- Participants Section - NEW FEATURE, BACKEND NEEDED -->
                     <VBox spacing="10" style="-fx-padding: 15;">
                         <HBox alignment="CENTER_LEFT">
                             <Label text="Participants" style="-fx-font-size: 14; -fx-font-weight: bold;"/>
                             <Region HBox.hgrow="ALWAYS"/>
-                            <Button fx:id="closeParticipantsBtn" text="✕" style="-fx-background-color: transparent; -fx-text-fill: #999; -fx-cursor: hand;" onAction="#handleCloseParticipants"/>
+                            <Button fx:id="closeParticipantsBtn" text="✕" onAction="#handleCloseParticipants" style="-fx-background-color: transparent; -fx-text-fill: #999; -fx-cursor: hand;"/>
                         </HBox>
-                        
                         <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;" prefHeight="200">
-                            <VBox fx:id="participantsList" spacing="10" style="-fx-padding: 5;">
-                                <!-- Participant items will be added programmatically -->
-                            </VBox>
+                            <VBox fx:id="participantsList" spacing="10" style="-fx-padding: 5;"/>
                         </ScrollPane>
-                        
-                        <Button fx:id="inviteOthersBtn" text="👥 Invite Others" style="-fx-background-color: #e3f2fd; -fx-text-fill: #1976d2; -fx-background-radius: 6; -fx-cursor: hand; -fx-padding: 8; -fx-font-weight: bold;" maxWidth="Infinity" onAction="#handleInviteOthers"/>
                     </VBox>
-                    
                     <Separator/>
-                    
-                    <!-- Session Chat - EXISTING -->
                     <VBox spacing="10" style="-fx-padding: 15;" VBox.vgrow="ALWAYS">
                         <Label text="Session Chat" style="-fx-font-size: 14; -fx-font-weight: bold;"/>
-                        
-                        <ListView fx:id="chatListView" style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e0e0e0;" VBox.vgrow="ALWAYS"/>
-                        
+                        <ListView fx:id="chatListView" VBox.vgrow="ALWAYS"/>
                         <HBox spacing="8">
-                            <TextField fx:id="chatTextField" promptText="Type a message..." style="-fx-background-radius: 20; -fx-border-radius: 20; -fx-border-color: #e0e0e0; -fx-padding: 8 15;" HBox.hgrow="ALWAYS" onAction="#handleSendChatMessage"/>
-                            <Button fx:id="sendChatButton" text="➤" style="-fx-background-color: #6366f1; -fx-text-fill: white; -fx-background-radius: 20; -fx-cursor: hand; -fx-font-size: 16; -fx-font-weight: bold;" prefWidth="40" prefHeight="40" onAction="#handleSendChatMessage"/>
+                            <TextField fx:id="chatTextField" promptText="Type a message..." style="-fx-background-radius: 20; -fx-border-radius: 20;" HBox.hgrow="ALWAYS" onAction="#handleSendChatMessage"/>
+                            <Button fx:id="sendChatButton" text="➤" onAction="#handleSendChatMessage" style="-fx-background-color: #6366f1; -fx-text-fill: white; -fx-background-radius: 20;" prefWidth="40" prefHeight="40"/>
                         </HBox>
-                    </VBox>
-                    
-                    <Separator/>
-                    
-                    <!-- Version History Section - NEW FEATURE, BACKEND NEEDED -->
-                    <VBox spacing="10" style="-fx-padding: 15;">
-                        <HBox alignment="CENTER_LEFT">
-                            <Label text="Version History" style="-fx-font-size: 14; -fx-font-weight: bold;"/>
-                            <Region HBox.hgrow="ALWAYS"/>
-                            <Button fx:id="closeVersionBtn" text="✕" style="-fx-background-color: transparent; -fx-text-fill: #999; -fx-cursor: hand;" onAction="#handleCloseVersion"/>
-                        </HBox>
-                        
-                        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;" prefHeight="150">
-                            <VBox fx:id="versionHistoryList" spacing="12" style="-fx-padding: 5;">
-                                <!-- Version items will be added programmatically -->
-                            </VBox>
-                        </ScrollPane>
                     </VBox>
                 </VBox>
             </right>
         </BorderPane>
     </center>
-    
-    <!-- Exit Room Button (Bottom Right) - EXISTING -->
+
     <bottom>
         <HBox alignment="CENTER_RIGHT" style="-fx-padding: 10; -fx-background-color: transparent;">
-            <Button fx:id="exitRoomBtn" text="🚪 Exit Room" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 10 20; -fx-font-weight: bold; -fx-cursor: hand;" onAction="#handleExitRoom"/>
+            <Button fx:id="exitRoomBtn" text="🚪 Exit Room" onAction="#handleExitRoom" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 10 20; -fx-font-weight: bold; -fx-cursor: hand;"/>
         </HBox>
     </bottom>
 </BorderPane>

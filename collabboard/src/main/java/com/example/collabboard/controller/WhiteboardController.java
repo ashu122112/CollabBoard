@@ -41,11 +41,12 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import javafx.scene.control.Tooltip;
 
 @Component
 public class WhiteboardController {
 
-    private enum Tool { SELECTION, HAND, PEN, TEXT, ERASER, RECTANGLE, OVAL, STICKY_NOTE }
+    private enum Tool { SELECTION, HAND, PEN, TEXT, ERASER, RECTANGLE, OVAL, STICKY_NOTE, SHAPE  }
 
     // Use Stacks for efficient push/pop operations for undo/redo
     private final Stack<String> drawingHistory = new Stack<>();
@@ -57,6 +58,7 @@ public class WhiteboardController {
     private double lastX, lastY;
     private double currentZoom = 1.0;
     private Scale scaleTransform;
+    private boolean isBoardLocked = false;
 
     // Canvas and core elements
     @FXML private AnchorPane canvasPane;
@@ -66,6 +68,7 @@ public class WhiteboardController {
     @FXML private ListView<String> chatListView;
     @FXML private TextField chatTextField;
     @FXML private Button sendChatButton;
+    @FXML private ToggleButton lockBoardButton;
 
     // Tool group and individual tools
     @FXML private ToggleGroup toolGroup;
@@ -150,7 +153,7 @@ public class WhiteboardController {
         // Initialize zoom functionality
         setupZoomControls();
 
-        // Setup tool group selection  
+        // Setup tool group selection
         setupToolGroup();
 
         // Initialize room info for all
@@ -164,6 +167,16 @@ public class WhiteboardController {
         collaborationService.setOnDataReceived(this::parseData);
         setupCanvasEventHandlers();
         initializeUIComponents();
+
+        if (collaborationService.isHost()) {
+            lockBoardButton.setVisible(true); // Only the host can see the lock button
+        }
+
+        // --- NEW: Add Tooltips Programmatically ---
+        Tooltip.install(penTool, new Tooltip("Pen"));
+        Tooltip.install(eraserTool, new Tooltip("Eraser"));
+        Tooltip.install(undoBtn, new Tooltip("Undo"));
+        Tooltip.install(redoBtn, new Tooltip("Redo"));
     }
 
     // --- FXML ACTION HANDLERS ---
@@ -243,7 +256,7 @@ public class WhiteboardController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Upload Image");
         fileChooser.getExtensionFilters().addAll(
-            new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
         );
         File file = fileChooser.showOpenDialog(canvas.getScene().getWindow());
         if (file != null) {
@@ -314,6 +327,17 @@ public class WhiteboardController {
             }
             scaleTransform.setX(currentZoom);
             scaleTransform.setY(currentZoom);
+        }
+    }
+
+    @FXML
+    private void handleLockBoard(ActionEvent event) {
+        if (lockBoardButton.isSelected()) {
+            collaborationService.send("LOCK_BOARD");
+            lockBoardButton.setText("🔒 Unlock");
+        } else {
+            collaborationService.send("UNLOCK_BOARD");
+            lockBoardButton.setText("🔒 Lock");
         }
     }
 
@@ -497,6 +521,7 @@ public class WhiteboardController {
         startY = event.getY();
         lastX = startX; // Initialize lastX/Y here
         lastY = startY;
+        if (isBoardLocked && !collaborationService.isHost()) return; // PREVENT ACTION IF LOCKED
         if (currentTool == Tool.PEN) {
             graphicsContext.setStroke(colorPicker.getValue());
             graphicsContext.setLineWidth(2.0);
@@ -513,11 +538,12 @@ public class WhiteboardController {
         double x = event.getX();
         double y = event.getY();
         String data = null;
+        if (isBoardLocked && !collaborationService.isHost()) return; // PREVENT ACTION IF LOCKED
         if (currentTool == Tool.PEN) {
             graphicsContext.lineTo(x, y);
             graphicsContext.stroke();
             data = String.format("DRAW:%.2f,%.2f,%.2f,%.2f,%s", lastX, lastY, x, y, colorPicker.getValue().toString());
-            
+
         } else if (currentTool == Tool.ERASER) {
             double eraserSize = 15.0;
             eraseData(String.format("%.2f,%.2f,%.2f", x, y, eraserSize));
@@ -529,7 +555,7 @@ public class WhiteboardController {
         lastX = x;
         lastY = y;
     }
-    
+
     private void handleMouseReleased(MouseEvent event) {
         if (currentTool != Tool.RECTANGLE && currentTool != Tool.OVAL) return;
         double endX = event.getX();
@@ -540,6 +566,7 @@ public class WhiteboardController {
         double y = Math.min(startY, endY);
         double width = Math.abs(startX - endX);
         double height = Math.abs(startY - endY);
+        if (isBoardLocked && !collaborationService.isHost()) return; // PREVENT ACTION IF LOCKED
         if (currentTool == Tool.RECTANGLE) {
             data = String.format("RECTANGLE:%.2f,%.2f,%.2f,%.2f,%s", x, y, width, height, color.toString());
         } else if (currentTool == Tool.OVAL) {
@@ -549,7 +576,7 @@ public class WhiteboardController {
             collaborationService.send(data);
         }
     }
-    
+
     private void parseData(String data) {
         // When a new drawing action occurs, clear the redo history
         if (data.startsWith("DRAW:") || data.startsWith("ERASE:") || data.startsWith("RECTANGLE:") || data.startsWith("OVAL:") || data.startsWith("STICKY_NOTE:")) {
@@ -577,6 +604,23 @@ public class WhiteboardController {
                     if (!redoHistory.isEmpty()) {
                         drawingHistory.push(redoHistory.pop());
                         redrawCanvas();
+                    }
+                    return;
+                }
+                // --- NEW: Handle Session Management Commands ---
+                if ("LOCK_BOARD".equals(data)) {
+                    isBoardLocked = true;
+                    if (lockBoardButton.isVisible()) { // If host, update button state
+                        lockBoardButton.setSelected(true);
+                        lockBoardButton.setText("🔒 Unlock");
+                    }
+                    return;
+                }
+                if ("UNLOCK_BOARD".equals(data)) {
+                    isBoardLocked = false;
+                    if (lockBoardButton.isVisible()) {
+                        lockBoardButton.setSelected(false);
+                        lockBoardButton.setText("🔒 Lock");
                     }
                     return;
                 }
@@ -670,7 +714,7 @@ public class WhiteboardController {
             System.err.println("Error erasing data: " + content);
         }
     }
-    
+
     private void drawRectangle(String content) {
         try {
             String[] params = content.split(",");
@@ -686,7 +730,7 @@ public class WhiteboardController {
             System.err.println("Error drawing rectangle: " + content);
         }
     }
-    
+
     private void drawOval(String content) {
         try {
             String[] params = content.split(",");
