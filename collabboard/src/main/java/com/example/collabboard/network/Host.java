@@ -3,15 +3,14 @@ package com.example.collabboard.network;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public class Host implements Runnable {
     private final int port;
     private ServerSocket serverSocket;
-    private final List<PrintWriter> clientWriters = Collections.synchronizedList(new ArrayList<>());
+    private final Map<PrintWriter, String> clients = new ConcurrentHashMap<>();
     private final Consumer<String> onDataReceived;
 
     public Host(int port, Consumer<String> onDataReceived) {
@@ -25,8 +24,6 @@ public class Host implements Runnable {
             serverSocket = new ServerSocket(port);
             while (!serverSocket.isClosed()) {
                 Socket clientSocket = serverSocket.accept();
-                PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true);
-                clientWriters.add(writer);
                 new Thread(new ClientHandler(clientSocket, this)).start();
             }
         } catch (IOException e) {
@@ -34,31 +31,47 @@ public class Host implements Runnable {
         }
     }
 
+    public void addClient(PrintWriter writer, String username) {
+        clients.put(writer, username);
+        broadcastUserList();
+    }
+
+    private void broadcastUserList() {
+        String userList = String.join(",", clients.values());
+        broadcast("USER_LIST:" + userList);
+    }
+
     public void broadcast(String message) {
-        // First, process the action on the host's own screen
         onDataReceived.accept(message);
-        // Then, send the message to all connected clients
-        synchronized (clientWriters) {
-            for (PrintWriter writer : clientWriters) {
-                writer.println(message);
-            }
-        }
+        clients.keySet().forEach(writer -> writer.println(message));
     }
 
     public void forwardMessage(String message, PrintWriter sender) {
-        onDataReceived.accept(message); // Host processes the message
-        // Forward the message to all clients except the one who sent it
-        synchronized (clientWriters) {
-            for (PrintWriter writer : clientWriters) {
-                if (writer != sender) {
-                    writer.println(message);
-                }
+        onDataReceived.accept(message);
+        clients.forEach((writer, username) -> {
+            if (writer != sender) {
+                writer.println(message);
             }
+        });
+    }
+
+    public void kickUser(String usernameToKick) {
+        PrintWriter writerToKick = null;
+        for (Map.Entry<PrintWriter, String> entry : clients.entrySet()) {
+            if (entry.getValue().equals(usernameToKick)) {
+                writerToKick = entry.getKey();
+                break;
+            }
+        }
+        if (writerToKick != null) {
+            writerToKick.println("YOU_WERE_KICKED");
+            removeClient(writerToKick);
         }
     }
 
     public void removeClient(PrintWriter writer) {
-        clientWriters.remove(writer);
+        clients.remove(writer);
+        broadcastUserList();
     }
 
     public void shutdown() {
@@ -71,7 +84,8 @@ public class Host implements Runnable {
         }
     }
 
-    // Inner class to handle incoming messages from a single client
+    // (shutdown method is the same)
+
     private static class ClientHandler implements Runnable {
         private final Socket clientSocket;
         private final Host host;
@@ -86,12 +100,21 @@ public class Host implements Runnable {
         public void run() {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
                 this.writer = new PrintWriter(clientSocket.getOutputStream(), true);
+
+                String identifyMessage = reader.readLine();
+                if (identifyMessage != null && identifyMessage.startsWith("IDENTIFY:")) {
+                    String username = identifyMessage.substring(9);
+                    host.addClient(this.writer, username);
+                } else {
+                    return; // Invalid connection
+                }
+
                 String message;
                 while ((message = reader.readLine()) != null) {
                     host.forwardMessage(message, this.writer);
                 }
             } catch (IOException e) {
-                System.out.println("Client disconnected.");
+                // Client disconnected
             } finally {
                 if (writer != null) {
                     host.removeClient(writer);
