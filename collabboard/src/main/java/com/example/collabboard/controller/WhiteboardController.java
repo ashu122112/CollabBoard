@@ -959,7 +959,7 @@ public class WhiteboardController {
             System.out.println("Screen sharing started");
             
         } catch (Exception e) {
-            showError("Failed to start screen sharing", e.getMessage());
+            //showError("Failed to start screen sharing", e.getMessage());
         }
     }
     
@@ -994,7 +994,7 @@ public class WhiteboardController {
         // For now, reset to full screen
         // In a full implementation, you would show a screen selection dialog
         screenCaptureService.resetCaptureAreaToFullScreen();
-        showInfo("Screen Area", "Screen area reset to full screen. Custom area selection coming soon!");
+        //showInfo("Screen Area", "Screen area reset to full screen. Custom area selection coming soon!");
     }
     
     /**
