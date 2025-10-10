@@ -37,6 +37,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.transform.Scale;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
+import javafx.stage.Screen;
+import javafx.geometry.Rectangle2D;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -220,6 +222,15 @@ public class WhiteboardController {
         Tooltip.install(eraserTool, new Tooltip("Eraser"));
         Tooltip.install(undoBtn, new Tooltip("Undo"));
         Tooltip.install(redoBtn, new Tooltip("Redo"));
+        
+        // Apply screen size constraints to ensure proper sizing
+        Platform.runLater(() -> {
+            applyScreenSizeConstraints();
+            optimizeCanvasSize();
+            
+            // Add listener for screen size changes
+            setupScreenSizeListener();
+        });
     }
 
     // --- FXML ACTION HANDLERS ---
@@ -1148,5 +1159,115 @@ public class WhiteboardController {
             handleStopScreenSharing();
         }
         screenCaptureService.cleanup();
+    }
+    
+    /**
+     * Apply screen size constraints to ensure the whiteboard doesn't exceed screen boundaries.
+     * This method should be called when the whiteboard is initialized or when screen size changes.
+     */
+    public void applyScreenSizeConstraints() {
+        Screen primaryScreen = Screen.getPrimary();
+        Rectangle2D screenBounds = primaryScreen.getVisualBounds();
+        
+        // Get the current stage from the scene
+        if (canvas != null && canvas.getScene() != null && canvas.getScene().getWindow() != null) {
+            javafx.stage.Stage stage = (javafx.stage.Stage) canvas.getScene().getWindow();
+            
+            // Ensure stage doesn't exceed screen bounds
+            double maxWidth = screenBounds.getWidth();
+            double maxHeight = screenBounds.getHeight();
+            
+            if (stage.getWidth() > maxWidth) {
+                stage.setWidth(maxWidth);
+            }
+            if (stage.getHeight() > maxHeight) {
+                stage.setHeight(maxHeight);
+            }
+            
+            // Ensure stage position is within screen bounds
+            double stageX = stage.getX();
+            double stageY = stage.getY();
+            
+            if (stageX < screenBounds.getMinX()) {
+                stage.setX(screenBounds.getMinX());
+            } else if (stageX + stage.getWidth() > screenBounds.getMaxX()) {
+                stage.setX(screenBounds.getMaxX() - stage.getWidth());
+            }
+            
+            if (stageY < screenBounds.getMinY()) {
+                stage.setY(screenBounds.getMinY());
+            } else if (stageY + stage.getHeight() > screenBounds.getMaxY()) {
+                stage.setY(screenBounds.getMaxY() - stage.getHeight());
+            }
+        }
+    }
+    
+    /**
+     * Get the optimal canvas size based on current screen dimensions.
+     * This ensures the canvas doesn't exceed screen boundaries while maintaining usability.
+     */
+    public void optimizeCanvasSize() {
+        Screen primaryScreen = Screen.getPrimary();
+        Rectangle2D screenBounds = primaryScreen.getVisualBounds();
+        
+        // Calculate optimal canvas size (leave some margin for UI elements)
+        double maxCanvasWidth = screenBounds.getWidth() - 100; // Leave margin for sidebars
+        double maxCanvasHeight = screenBounds.getHeight() - 200; // Leave margin for toolbars and status
+        
+        // Ensure minimum canvas size for usability
+        double minCanvasWidth = 400;
+        double minCanvasHeight = 300;
+        
+        if (canvas != null) {
+            // Get the current canvas size
+            double currentWidth = canvas.getWidth();
+            double currentHeight = canvas.getHeight();
+            
+            // Apply constraints
+            if (currentWidth > maxCanvasWidth) {
+                canvas.setWidth(maxCanvasWidth);
+            } else if (currentWidth < minCanvasWidth) {
+                canvas.setWidth(minCanvasWidth);
+            }
+            
+            if (currentHeight > maxCanvasHeight) {
+                canvas.setHeight(maxCanvasHeight);
+            } else if (currentHeight < minCanvasHeight) {
+                canvas.setHeight(minCanvasHeight);
+            }
+        }
+    }
+    
+    /**
+     * Setup a listener to handle screen size changes dynamically.
+     * This ensures the application adapts when the screen resolution changes or when moved between monitors.
+     */
+    private void setupScreenSizeListener() {
+        if (canvas != null && canvas.getScene() != null && canvas.getScene().getWindow() != null) {
+            javafx.stage.Stage stage = (javafx.stage.Stage) canvas.getScene().getWindow();
+            
+            // Listen for stage position and size changes
+            stage.xProperty().addListener((obs, oldVal, newVal) -> {
+                Platform.runLater(this::applyScreenSizeConstraints);
+            });
+            
+            stage.yProperty().addListener((obs, oldVal, newVal) -> {
+                Platform.runLater(this::applyScreenSizeConstraints);
+            });
+            
+            stage.widthProperty().addListener((obs, oldVal, newVal) -> {
+                Platform.runLater(() -> {
+                    applyScreenSizeConstraints();
+                    optimizeCanvasSize();
+                });
+            });
+            
+            stage.heightProperty().addListener((obs, oldVal, newVal) -> {
+                Platform.runLater(() -> {
+                    applyScreenSizeConstraints();
+                    optimizeCanvasSize();
+                });
+            });
+        }
     }
 }
