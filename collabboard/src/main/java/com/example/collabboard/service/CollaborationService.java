@@ -64,7 +64,7 @@ public class CollaborationService {
         stop();
         currentMode = CommunicationMode.CLOUD;
         // For local testing, the server is at localhost:8080. When deployed, this URL will change.
-        String serverUrl = "ws://localhost:8080/ws";
+        String serverUrl = "ws://collabboard-backend2.onrender.com";
         cloudClient = new StompClient(serverUrl, roomCode, this::receiveData, onSuccess, onFailure);
         cloudClient.connect();
     }
