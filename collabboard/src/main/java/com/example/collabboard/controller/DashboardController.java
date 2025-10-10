@@ -1,109 +1,140 @@
 package com.example.collabboard.controller;
 
+import com.example.collabboard.config.FxmlView;
 import com.example.collabboard.model.User;
 import com.example.collabboard.service.CollaborationService;
-import com.example.collabboard.service.SessionManager;
-import com.example.collabboard.util.SceneManager;
+import com.example.collabboard.service.StageManager;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 @Component
 public class DashboardController {
 
     // --- Dependencies ---
-    private final SessionManager sessionManager;
-    private final CollaborationService collaborationService;
-    private final ApplicationContext applicationContext;
+    @Lazy // Lazy loading helps prevent circular dependency issues during startup
+    @Autowired
+    private StageManager stageManager;
 
-    // --- FXML Fields ---
+    @Autowired
+    private CollaborationService collaborationService;
+
+    // --- State ---
+    private User loggedInUser;
+
+    // --- FXML Fields from the new DashboardView.fxml ---
     @FXML private Label welcomeLabel;
-    @FXML private TextField ipAddressField;
+    @FXML private TextField ipAddressField;       // For LAN
+    @FXML private TextField cloudRoomCodeField;   // For Cloud
     @FXML private Label messageLabel;
 
-    // Use constructor injection for all dependencies
-    public DashboardController(SessionManager sessionManager, CollaborationService collaborationService, ApplicationContext applicationContext) {
-        this.sessionManager = sessionManager;
-        this.collaborationService = collaborationService;
-        this.applicationContext = applicationContext;
-    }
-
-    @FXML
-    public void initialize() {
-        // Pull the logged-in user from the central session manager
-        User currentUser = sessionManager.getCurrentUser();
-        if (currentUser != null) {
-            welcomeLabel.setText("Welcome, " + currentUser.getUsername() + "!");
-        } else {
-            welcomeLabel.setText("Welcome!");
+    /**
+     * Called from the LoginController to pass the current user's data.
+     */
+    public void setLoggedInUser(User user) {
+        this.loggedInUser = user;
+        if (loggedInUser != null) {
+            welcomeLabel.setText("Welcome, " + loggedInUser.getUsername() + "!");
         }
     }
 
+    // --- LAN Methods ---
+
     @FXML
-    void handleCreateRoom(ActionEvent event) {
+    void handleCreateLanRoom(ActionEvent event) {
         try {
-            collaborationService.startHost(12345); // Start the server
-            String localIp = InetAddress.getLocalHost().getHostAddress();
-
-            // Store the IP in the central service for the next screen to access
-            collaborationService.setCurrentRoomIdentifier(localIp);
-
-            // Navigate to the whiteboard
-            SceneManager.switchScene(event, "WhiteboardView.fxml", "CollabBoard", applicationContext);
-        } catch (IOException e) {
+            collaborationService.startHost(12345);
+            String roomCode = InetAddress.getLocalHost().getHostAddress();
+            messageLabel.setStyle("-fx-text-fill: green;");
+            messageLabel.setText("LAN Room created! Share this IP: " + roomCode);
+            navigateToWhiteboard(roomCode);
+        } catch (Exception e) {
             messageLabel.setStyle("-fx-text-fill: red;");
-            messageLabel.setText("Failed to start host: " + e.getMessage());
+            messageLabel.setText("Failed to create LAN room: " + e.getMessage());
         }
     }
 
     @FXML
-    void handleJoinRoom(ActionEvent event) {
+    void handleJoinLanRoom(ActionEvent event) {
         String ipAddress = ipAddressField.getText();
         if (ipAddress == null || ipAddress.trim().isEmpty()) {
-            messageLabel.setStyle("-fx-text-fill: red;");
             messageLabel.setText("Please enter the Host's IP Address.");
             return;
         }
-
         messageLabel.setText("Connecting to " + ipAddress + "...");
-
-        // Use the improved connectToHost method with callbacks
+        // Use the callback-based method to handle connection success or failure
         collaborationService.connectToHost(ipAddress.trim(), 12345,
-                // On Success:
-                () -> {
-                    // Store the IP in the central service
-                    collaborationService.setCurrentRoomIdentifier(ipAddress.trim());
+            () -> Platform.runLater(() -> navigateToWhiteboard(ipAddress.trim())),
+            (ex) -> Platform.runLater(() -> {
+                messageLabel.setStyle("-fx-text-fill: red;");
+                messageLabel.setText("Failed to connect: " + ex.getMessage());
+            })
+        );
+    }
 
-                    collaborationService.send("IDENTIFY:" + sessionManager.getCurrentUser().getUsername());
-                    // Navigate to the whiteboard on the JavaFX thread
-                    Platform.runLater(() -> {
-                        try {
-                            SceneManager.switchScene(event, "WhiteboardView.fxml", "CollabBoard", applicationContext);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                },
-                // On Failure:
-                (exception) -> Platform.runLater(() -> {
-                    messageLabel.setStyle("-fx-text-fill: red;");
-                    messageLabel.setText("Failed to connect: " + exception.getMessage());
-                })
+    // --- Cloud Methods ---
+
+    @FXML
+    void handleCreateCloudRoom(ActionEvent event) {
+        messageLabel.setText("Creating Cloud Room...");
+        collaborationService.createCloudRoom(
+            // On Success, we receive the generated room code
+            (roomCode) -> Platform.runLater(() -> {
+                messageLabel.setStyle("-fx-text-fill: green;");
+                messageLabel.setText("Cloud Room created! Share this Code: " + roomCode);
+                navigateToWhiteboard(roomCode);
+            }),
+            // On Failure
+            (ex) -> Platform.runLater(() -> {
+                messageLabel.setStyle("-fx-text-fill: red;");
+                messageLabel.setText("Failed to create Cloud Room: " + ex.getMessage());
+            })
         );
     }
 
     @FXML
-    void handleLogoutButtonAction(ActionEvent event) throws IOException {
-        sessionManager.clearSession();
-        collaborationService.stop();
-        SceneManager.switchScene(event, "LoginView.fxml", "CollabBoard Login", applicationContext);
+    void handleJoinCloudRoom(ActionEvent event) {
+        String roomCode = cloudRoomCodeField.getText();
+        if (roomCode == null || roomCode.trim().isEmpty()) {
+            messageLabel.setText("Please enter a Cloud Room Code.");
+            return;
+        }
+        messageLabel.setText("Joining Cloud Room " + roomCode + "...");
+        collaborationService.joinCloudRoom(roomCode.trim(),
+            // On Success
+            () -> Platform.runLater(() -> navigateToWhiteboard(roomCode.trim())),
+            // On Failure
+            (ex) -> Platform.runLater(() -> {
+                messageLabel.setStyle("-fx-text-fill: red;");
+                messageLabel.setText("Failed to join: " + ex.getMessage());
+            })
+        );
+    }
+
+    // --- Common and Logout Methods ---
+
+    /**
+     * A helper method to avoid duplicating navigation code.
+     */
+    private void navigateToWhiteboard(String roomCode) {
+        // Use the StageManager to switch scenes and get the new controller
+        WhiteboardController wc = stageManager.switchScene(FxmlView.WHITEBOARD);
+        // Pass the room identifier to the new controller
+        wc.initData(roomCode);
+    }
+
+    @FXML
+    void handleLogoutButtonAction(ActionEvent event) {
+        loggedInUser = null;
+        collaborationService.stop(); // Stop any active LAN or Cloud connection
+        stageManager.switchScene(FxmlView.LOGIN); // Use StageManager to go back to login
     }
 }
+

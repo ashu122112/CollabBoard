@@ -146,6 +146,12 @@ public class WhiteboardController {
         this.sessionManager = sessionManager;
         this.applicationContext = applicationContext;
     }
+    public void initData(String roomCode) {
+        Platform.runLater(() -> {
+            String labelPrefix = collaborationService.isHost() ? "Room IP (Host): " : "Room: ";
+            roomCodeLabel.setText(labelPrefix + roomCode);
+        });
+    }
 
     @FXML
     public void initialize() {
@@ -693,7 +699,7 @@ public class WhiteboardController {
                 kickButton.setStyle("-fx-background-color: #ffcdd2; -fx-text-fill: #c62828; -fx-font-size: 10; -fx-cursor: hand;");
                 kickButton.setOnAction(e -> {
                     // Send a command to the host's own service to kick the user
-                    collaborationService.kickUser(username);
+                    //collaborationService.kickUser(username);
                 });
                 userEntry.getChildren().add(kickButton);
             }
