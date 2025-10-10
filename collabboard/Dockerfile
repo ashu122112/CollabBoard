@@ -1,5 +1,4 @@
-# Use an official OpenJDK runtime as a parent image
-# We use version 17 to match your pom.xml
+# Use an official OpenJDK 17 runtime as the parent image
 FROM eclipse-temurin:17-jdk-jammy
 
 # Set the working directory inside the container
@@ -10,13 +9,20 @@ COPY .mvn/ .mvn
 COPY mvnw .
 COPY pom.xml .
 
-# Build the application JAR file inside the container
-# This is the same command you ran locally
+# --- THIS IS THE FIX ---
+# Add executable permissions to the Maven wrapper script
+RUN chmod +x mvnw
+
+# Now that it's executable, run the command to download dependencies
 RUN ./mvnw dependency:go-offline
+
+# Copy the rest of your source code
 COPY src ./src
+
+# Build the application JAR file
 RUN ./mvnw clean package -DskipTests
 
-# Expose the port that your Spring Boot application runs on
+# Expose the port your application runs on
 EXPOSE 8080
 
 # The command to run your application when the container starts
