@@ -30,6 +30,7 @@
         <!-- FIX: Set Java version to 17 to match the deployment environment -->
         <java.version>17</java.version>
         <openjfx.version>22.0.1</openjfx.version>
+        <start-class>com.example.collabboard.ServerApplication</start-class>
     </properties>
     <dependencies>
         <!-- JavaFX -->
