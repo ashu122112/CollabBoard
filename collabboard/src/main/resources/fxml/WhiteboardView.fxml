@@ -168,8 +168,39 @@
                     </VBox>
                     <Separator/>
                     <VBox spacing="10" style="-fx-padding: 15;" VBox.vgrow="ALWAYS">
+                        <Label text="Screen Sharing" style="-fx-font-size: 14; -fx-font-weight: bold;"/>
+                        
+                        <!-- Screen Sharing Controls -->
+                        <VBox spacing="8" style="-fx-background-color: #f8f9fa; -fx-background-radius: 8; -fx-padding: 10;">
+                            <HBox spacing="8" alignment="CENTER_LEFT">
+                                <Button fx:id="startSharingButton" text="📺 Start Sharing" onAction="#handleStartScreenSharing" style="-fx-background-color: #28a745; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-size: 11; -fx-font-weight: bold;" prefHeight="32"/>
+                                <Button fx:id="stopSharingButton" text="⏹ Stop" onAction="#handleStopScreenSharing" style="-fx-background-color: #dc3545; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-size: 11; -fx-font-weight: bold;" prefHeight="32" visible="false"/>
+                            </HBox>
+                            
+                            <HBox spacing="8" alignment="CENTER_LEFT">
+                                <Label text="Quality:" style="-fx-font-size: 11;"/>
+                                <ComboBox fx:id="qualityComboBox" prefWidth="100" prefHeight="28" style="-fx-font-size: 10;"/>
+                            </HBox>
+                            
+                            <HBox spacing="8" alignment="CENTER_LEFT">
+                                <Label text="FPS:" style="-fx-font-size: 11;"/>
+                                <ComboBox fx:id="fpsComboBox" prefWidth="80" prefHeight="28" style="-fx-font-size: 10;"/>
+                            </HBox>
+                            
+                            <Button fx:id="selectAreaButton" text="📐 Select Area" onAction="#handleSelectScreenArea" style="-fx-background-color: #6c757d; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-size: 11;" prefHeight="28"/>
+                            
+                            <Label fx:id="sharingStatusLabel" text="Ready to share" style="-fx-font-size: 10; -fx-text-fill: #666;"/>
+                        </VBox>
+                        
+                        <!-- Shared Screens Display -->
+                        <ScrollPane fx:id="sharedScreensScrollPane" fitToWidth="true" prefHeight="200" style="-fx-background-color: transparent; -fx-border-color: #e0e0e0; -fx-border-radius: 6;">
+                            <VBox fx:id="sharedScreensContainer" spacing="8" style="-fx-padding: 8;"/>
+                        </ScrollPane>
+                        
+                        <Separator/>
+                        
                         <Label text="Session Chat" style="-fx-font-size: 14; -fx-font-weight: bold;"/>
-                        <ListView fx:id="chatListView" VBox.vgrow="ALWAYS"/>
+                        <ListView fx:id="chatListView" prefHeight="150"/>
                         <HBox spacing="8">
                             <TextField fx:id="chatTextField" promptText="Type a message..." style="-fx-background-radius: 20; -fx-border-radius: 20;" HBox.hgrow="ALWAYS" onAction="#handleSendChatMessage"/>
                             <Button fx:id="sendChatButton" text="Send" onAction="#handleSendChatMessage" style="-fx-background-color: #6366f1; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-size: 12; -fx-font-weight: bold;" prefWidth="60" prefHeight="40"/>
