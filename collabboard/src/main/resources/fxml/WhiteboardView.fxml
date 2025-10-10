@@ -20,7 +20,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="900.0" prefWidth="1600.0" style="-fx-background-color: #f5f5f5;"
+<BorderPane prefHeight="900.0" prefWidth="1600.0" style="-fx-background-color: #f5f5f5;" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
             xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.collabboard.controller.WhiteboardController">
@@ -87,63 +87,63 @@
             <center>
                 <StackPane style="-fx-background-color: #f5f5f5;">
                     <VBox alignment="TOP_CENTER" StackPane.alignment="TOP_CENTER">
-                        <HBox alignment="CENTER" spacing="8" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 10 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
-                            <padding><Insets top="15" right="0" bottom="0" left="0"/></padding>
+                        <HBox alignment="CENTER" spacing="6" style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 8 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);" maxWidth="1.7976931348623157E308">
+                            <padding><Insets top="12" right="0" bottom="0" left="0"/></padding>
                             <fx:define><ToggleGroup fx:id="toolGroup"/></fx:define>
 
-                            <ToggleButton fx:id="selectTool" text="↖️" onAction="#selectSelectionTool" toggleGroup="$toolGroup" style="-fx-font-size: 16;" prefWidth="40" prefHeight="40">
+                            <ToggleButton fx:id="selectTool" text="↖️" onAction="#selectSelectionTool" toggleGroup="$toolGroup" style="-fx-font-size: 24; -fx-font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;" prefWidth="50" prefHeight="45">
                                 <tooltip><Tooltip text="Select Tool" /></tooltip>
                             </ToggleButton>
-                            <ToggleButton fx:id="handTool" text="✋" onAction="#selectHandTool" toggleGroup="$toolGroup" style="-fx-font-size: 16;" prefWidth="40" prefHeight="40">
+                            <ToggleButton fx:id="handTool" text="✋" onAction="#selectHandTool" toggleGroup="$toolGroup" style="-fx-font-size: 24; -fx-font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;" prefWidth="50" prefHeight="45">
                                 <tooltip><Tooltip text="Pan Tool" /></tooltip>
                             </ToggleButton>
-                            <Separator orientation="VERTICAL" prefHeight="30"/>
-                            <ToggleButton fx:id="lockBoardButton" text="🔒" onAction="#handleLockBoard" visible="false" prefWidth="80" prefHeight="40">
+                            <Separator orientation="VERTICAL" prefHeight="25"/>
+                            <ToggleButton fx:id="lockBoardButton" text="🔒" onAction="#handleLockBoard" visible="false" prefWidth="60" prefHeight="45" style="-fx-font-size: 22; -fx-font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;">
                                 <tooltip><Tooltip text="Lock/Unlock Board (Host Only)" /></tooltip>
                             </ToggleButton>
-                            <Separator orientation="VERTICAL" prefHeight="30"/>
-                            <ToggleButton fx:id="penTool" text="🖊️" onAction="#selectPenTool" toggleGroup="$toolGroup" selected="true" style="-fx-font-size: 16;" prefWidth="40" prefHeight="40">
+                            <Separator orientation="VERTICAL" prefHeight="25"/>
+                            <ToggleButton fx:id="penTool" text="🖊️" onAction="#selectPenTool" toggleGroup="$toolGroup" selected="true" style="-fx-font-size: 24; -fx-font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;" prefWidth="50" prefHeight="45">
                                 <tooltip><Tooltip text="Pen Tool" /></tooltip>
                             </ToggleButton>
-                            <ToggleButton fx:id="textTool" text="T" onAction="#selectTextTool" toggleGroup="$toolGroup" style="-fx-font-size: 16; -fx-font-weight: bold;" prefWidth="40" prefHeight="40">
+                            <ToggleButton fx:id="textTool" text="📝" onAction="#selectTextTool" toggleGroup="$toolGroup" style="-fx-font-size: 24; -fx-font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;" prefWidth="50" prefHeight="45">
                                 <tooltip><Tooltip text="Text Tool" /></tooltip>
                             </ToggleButton>
-                            <ToggleButton fx:id="noteTool" text="🗒️" onAction="#selectStickyNoteTool" toggleGroup="$toolGroup" style="-fx-font-size: 16;" prefWidth="40" prefHeight="40">
+                            <ToggleButton fx:id="noteTool" text="🗒️" onAction="#selectStickyNoteTool" toggleGroup="$toolGroup" style="-fx-font-size: 24; -fx-font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;" prefWidth="50" prefHeight="45">
                                 <tooltip><Tooltip text="Sticky Note" /></tooltip>
                             </ToggleButton>
-                            <ToggleButton fx:id="shapeTool" text="🀰" onAction="#selectRectangleTool" toggleGroup="$toolGroup" style="-fx-font-size: 16;" prefWidth="40" prefHeight="40">
+                            <ToggleButton fx:id="shapeTool" text="⬜" onAction="#selectRectangleTool" toggleGroup="$toolGroup" style="-fx-font-size: 24; -fx-font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;" prefWidth="50" prefHeight="45">
                                 <tooltip><Tooltip text="Shape Tool" /></tooltip>
                             </ToggleButton>
-                            <Separator orientation="VERTICAL" prefHeight="30"/>
-                            <ColorPicker fx:id="colorPicker" prefWidth="100"/>
-                            <ToggleButton fx:id="eraserTool" text="🧹" onAction="#selectEraserTool" toggleGroup="$toolGroup" style="-fx-font-size: 16;" prefWidth="40" prefHeight="40">
+                            <Separator orientation="VERTICAL" prefHeight="25"/>
+                            <ColorPicker fx:id="colorPicker" prefWidth="80" prefHeight="45"/>
+                            <ToggleButton fx:id="eraserTool" text="🧹" onAction="#selectEraserTool" toggleGroup="$toolGroup" style="-fx-font-size: 24; -fx-font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;" prefWidth="50" prefHeight="45">
                                 <tooltip><Tooltip text="Eraser" /></tooltip>
                             </ToggleButton>
-                            <Separator orientation="VERTICAL" prefHeight="30"/>
-                            <Button fx:id="clearBtn" text="🗑" onAction="#handleClearCanvas" style="-fx-padding: 8 12;">
+                            <Separator orientation="VERTICAL" prefHeight="25"/>
+                            <Button fx:id="clearBtn" text="🗑️" onAction="#handleClearCanvas" style="-fx-padding: 8 12; -fx-font-size: 22; -fx-font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;" prefHeight="45">
                                 <tooltip><Tooltip text="Clear Entire Canvas" /></tooltip>
                             </Button>
-                            <Separator orientation="VERTICAL" prefHeight="30"/>
-                            <Button fx:id="undoBtn" text="↶" onAction="#handleUndo" style="-fx-font-size: 18;" prefWidth="40" prefHeight="40">
+                            <Separator orientation="VERTICAL" prefHeight="25"/>
+                            <Button fx:id="undoBtn" text="↶" onAction="#handleUndo" style="-fx-font-size: 24; -fx-font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;" prefWidth="50" prefHeight="45">
                                 <tooltip><Tooltip text="Undo" /></tooltip>
                             </Button>
-                            <Button fx:id="redoBtn" text="↷" onAction="#handleRedo" style="-fx-font-size: 18;" prefWidth="40" prefHeight="40">
+                            <Button fx:id="redoBtn" text="↷" onAction="#handleRedo" style="-fx-font-size: 24; -fx-font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;" prefWidth="50" prefHeight="45">
                                 <tooltip><Tooltip text="Redo" /></tooltip>
                             </Button>
-                            <Separator orientation="VERTICAL" prefHeight="30"/>
-                            <Button fx:id="saveBtn" text="Save" onAction="#handleSaveBoard" style="-fx-padding: 8 12;">
+                            <Separator orientation="VERTICAL" prefHeight="25"/>
+                            <Button fx:id="saveBtn" text="💾" onAction="#handleSaveBoard" style="-fx-padding: 8 12; -fx-font-size: 22; -fx-font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;" prefHeight="45">
                                 <tooltip><Tooltip text="Save Board State" /></tooltip>
                             </Button>
-                            <Button fx:id="loadBtn" text="📁" onAction="#handleLoadBoard" style="-fx-padding: 8 12;">
+                            <Button fx:id="loadBtn" text="📁" onAction="#handleLoadBoard" style="-fx-padding: 8 12; -fx-font-size: 22; -fx-font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;" prefHeight="45">
                                 <tooltip><Tooltip text="Load Board State" /></tooltip>
                             </Button>
-                            <Button fx:id="exportBtn" text="⬇" onAction="#handleExportAsImage" style="-fx-padding: 8 12;">
+                            <Button fx:id="exportBtn" text="⬇️" onAction="#handleExportAsImage" style="-fx-padding: 8 12; -fx-font-size: 22; -fx-font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;" prefHeight="45">
                                 <tooltip><Tooltip text="Export as Image" /></tooltip>
                             </Button>
-                            <Separator orientation="VERTICAL" prefHeight="30"/>
-                            <HBox alignment="CENTER" spacing="8">
-                                <Label fx:id="zoomLabel" text="100%" />
-                                <Slider fx:id="zoomSlider" min="10" max="200" value="100" prefWidth="100"/>
+                            <Separator orientation="VERTICAL" prefHeight="25"/>
+                            <HBox alignment="CENTER" spacing="6">
+                                <Label fx:id="zoomLabel" text="100%" style="-fx-font-size: 11;"/>
+                                <Slider fx:id="zoomSlider" min="10" max="200" value="100" prefWidth="80" prefHeight="35"/>
                             </HBox>
                         </HBox>
                     </VBox>
@@ -172,7 +172,7 @@
                         <ListView fx:id="chatListView" VBox.vgrow="ALWAYS"/>
                         <HBox spacing="8">
                             <TextField fx:id="chatTextField" promptText="Type a message..." style="-fx-background-radius: 20; -fx-border-radius: 20;" HBox.hgrow="ALWAYS" onAction="#handleSendChatMessage"/>
-                            <Button fx:id="sendChatButton" text="➤" onAction="#handleSendChatMessage" style="-fx-background-color: #6366f1; -fx-text-fill: white; -fx-background-radius: 20;" prefWidth="40" prefHeight="40"/>
+                            <Button fx:id="sendChatButton" text="Send" onAction="#handleSendChatMessage" style="-fx-background-color: #6366f1; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-size: 12; -fx-font-weight: bold;" prefWidth="60" prefHeight="40"/>
                         </HBox>
                     </VBox>
                 </VBox>
@@ -182,7 +182,7 @@
 
     <bottom>
         <HBox alignment="CENTER_RIGHT" style="-fx-padding: 10; -fx-background-color: transparent;">
-            <Button fx:id="exitRoomBtn" text="🚪 Exit Room" onAction="#handleExitRoom" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 10 20; -fx-font-weight: bold; -fx-cursor: hand;"/>
+            <Button fx:id="exitRoomBtn" text="Exit Room" onAction="#handleExitRoom" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 10 20; -fx-font-weight: bold; -fx-cursor: hand;"/>
         </HBox>
     </bottom>
 </BorderPane>

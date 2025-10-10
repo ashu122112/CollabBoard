@@ -148,8 +148,10 @@ public class WhiteboardController {
     }
     public void initData(String roomCode) {
         Platform.runLater(() -> {
-            String labelPrefix = collaborationService.isHost() ? "Room IP (Host): " : "Room: ";
+            String labelPrefix = collaborationService.isHost() ? "Host IP: " : "Room: ";
             roomCodeLabel.setText(labelPrefix + roomCode);
+            // Make sure the label is visible and properly styled
+            roomCodeLabel.setStyle("-fx-font-size: 12; -fx-text-fill: #333; -fx-background-color: #e8f4fd; -fx-padding: 8 12; -fx-background-radius: 6; -fx-border-color: #2196f3; -fx-border-width: 1; -fx-border-radius: 6;");
         });
     }
 
@@ -172,8 +174,10 @@ public class WhiteboardController {
         // Initialize room info for all
         String roomIdentifier = collaborationService.getCurrentRoomIdentifier();
         if (roomIdentifier != null) {
-            String labelPrefix = collaborationService.isHost() ? "Room: " : "Room: ";
+            String labelPrefix = collaborationService.isHost() ? "Host IP: " : "Room: ";
             roomCodeLabel.setText(labelPrefix + roomIdentifier);
+            // Ensure the label is visible and properly styled
+            roomCodeLabel.setStyle("-fx-font-size: 12; -fx-text-fill: #333; -fx-background-color: #e8f4fd; -fx-padding: 8 12; -fx-background-radius: 6; -fx-border-color: #2196f3; -fx-border-width: 1; -fx-border-radius: 6;");
         }
 
         // Initialize collaboration and UI
@@ -348,10 +352,10 @@ public class WhiteboardController {
     private void handleLockBoard(ActionEvent event) {
         if (lockBoardButton.isSelected()) {
             collaborationService.send("LOCK_BOARD");
-            lockBoardButton.setText("🔒 Unlock");
+            lockBoardButton.setText("🔓");
         } else {
             collaborationService.send("UNLOCK_BOARD");
-            lockBoardButton.setText("🔒 Lock");
+            lockBoardButton.setText("🔒");
         }
     }
 
@@ -626,7 +630,7 @@ public class WhiteboardController {
                     isBoardLocked = true;
                     if (lockBoardButton.isVisible()) { // If host, update button state
                         lockBoardButton.setSelected(true);
-                        lockBoardButton.setText("🔒 Unlock");
+                        lockBoardButton.setText("🔓");
                     }
                     return;
                 }
@@ -634,7 +638,7 @@ public class WhiteboardController {
                     isBoardLocked = false;
                     if (lockBoardButton.isVisible()) {
                         lockBoardButton.setSelected(false);
-                        lockBoardButton.setText("🔒 Lock");
+                        lockBoardButton.setText("🔒");
                     }
                     return;
                 }
